@@ -1,0 +1,72 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: left;
+}
+
+.listComponent {
+  text-align: left;
+  width: 350px;
+
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* This centers child items along the main axis */
+}
+/* Style for the div containing the list item and the "x" button */
+.listItem {
+  width: 170px;
+  display: flex;
+  justify-content: space-between; /* This will push the content and the "x" button apart, aligning the button to the right */
+  /* align-items: center; /* Optional: To vertically center-align the content and the button */
+  /* position: relative; Establishes a stacking context for the absolute positioned button */
+}
+
+/* By default, the "x" button is invisible */
+.listItem button {
+  opacity: 0;
+  transition: opacity 0.3s; /* Smooth fade-in transition */
+  background-color: white;
+  border: 1px solid transparent;
+}
+
+/* When hovering over the parent div, the "x" button becomes visible */
+.listItem:hover button {
+  opacity: 1;
+}
+
+/* Move the footer down */
+.footer {
+  margin-top: 30px; /* Adjust as needed */
+}
+
+.footer button {
+  background-color: white;
+  border: 1px solid transparent;
+  padding: 5px 10px; /* Add some padding for better appearance */
+  transition: border-color 0.3s; /* This makes the hover effect smooth */
+}
+
+.footer button:hover {
+  border-color: #000; /* Black border on hover */
+}
+
+/* Expand the input field */
+.listComponent input[type="text"] {
+  width: 100%; /* Full width of the parent */
+  padding: 10px; /* Adjust this value to make the input taller */
+  box-sizing: border-box; /* To ensure padding and borders are included in the width */
+  border: 1px solid #ccc; /* Optional, adds a light border around the input */
+  border-radius: 4px; /* Optional, rounds the corners */
+}
