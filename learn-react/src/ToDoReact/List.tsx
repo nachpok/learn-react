@@ -41,6 +41,7 @@ function ListR() {
       };
       return (
         <ListItem
+          key={item.id}
           item={item}
           handleChecked={handleChecked}
           handleRemove={handleRemove}
@@ -75,7 +76,12 @@ function ListR() {
         />
         {listComponents}
       </div>
-      <Footer listLen={list.length} setMode={setMode} setList={setList} />
+      <Footer
+        mode={mode}
+        listLen={list.filter((item) => !item.checked).length}
+        setMode={setMode}
+        setList={setList}
+      />
     </div>
   );
 }

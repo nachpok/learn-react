@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import store, { Item, TodoStore } from "./ToDoStore";
+import React, { useState } from "react";
+import store, { Item } from "./ToDoStore";
 import ListItem from "./ListItem";
 import { observer } from "mobx-react";
 import Footer from "../ToDoReact/Footer";
-import { reaction } from "mobx";
 export enum Mode {
   all = "all",
   active = "active",
@@ -12,19 +11,14 @@ export enum Mode {
 
 function ListX() {
   const [mode, setMode] = useState<Mode>(Mode.all);
-  // TODO why is it not rerendring and I need to use a useState to trigger??
-  const [_, forceUpdate] = useState<number>();
   const handleToggle = (itemId: number) => {
     store.toggleTodo(itemId);
-    forceUpdate(Date.now());
   };
   const handleRemove = (item: Item) => {
     store.removeTodo(item);
-    forceUpdate(Date.now());
   };
   const handleClear = () => {
     store.removeList();
-    forceUpdate(Date.now());
   };
   const filterMode = (item: Item) => {
     return (
@@ -77,6 +71,7 @@ function ListX() {
       </div>
       <Footer
         listLen={store.list.filter((item) => !item.isDone).length}
+        mode={mode}
         setMode={setMode}
         setList={handleClear}
       />

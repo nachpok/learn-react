@@ -1,4 +1,4 @@
-import { action, computed, observable } from "mobx";
+import { action, computed, makeAutoObservable, observable } from "mobx";
 import { database } from "../firebase";
 import { ref, onValue, set } from "firebase/database";
 import dayjs from "dayjs";
@@ -18,6 +18,8 @@ export class BlogStore {
   @observable isLoading = true;
 
   constructor() {
+    makeAutoObservable(this);
+
     const todosRef = ref(database, "posts");
     onValue(todosRef, (snapshot) => {
       this.setPosts(snapshot.val() || []);

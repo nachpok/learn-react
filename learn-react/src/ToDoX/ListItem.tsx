@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { Item } from "./ToDoStore";
 export interface ListItemProps {
@@ -6,7 +5,7 @@ export interface ListItemProps {
   toggle: (itemId: number) => void;
   remove: (item: Item) => void;
 }
-function ListItem({ item, toggle, remove: remove }: ListItemProps) {
+function ListItem({ item, toggle, remove }: ListItemProps) {
   const value = item.isDone ? <s>{item.text}</s> : <span>{item.text}</span>;
 
   const handleChange = () => {

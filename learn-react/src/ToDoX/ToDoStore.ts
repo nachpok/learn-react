@@ -1,4 +1,4 @@
-import { action, computed, observable } from "mobx";
+import { action, computed, makeAutoObservable, observable } from "mobx";
 import { database } from "../firebase";
 import { ref, onValue, set } from "firebase/database";
 
@@ -13,21 +13,17 @@ export class TodoStore {
   @observable isLoading = true;
 
   constructor() {
+    makeAutoObservable(this);
     const todosRef = ref(database, "todos");
     onValue(todosRef, (snapshot) => {
       this.setTodos(snapshot.val() || []);
     });
 
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 1);
+    this.isLoading = false;
   }
 
   @computed
   get todos() {
-    if (this.isLoading) {
-      throw new Promise((resolve) => setTimeout(resolve, 900)); // you can replace this with a relevant promise
-    }
     return this.list;
   }
   @action

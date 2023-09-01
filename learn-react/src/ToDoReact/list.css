@@ -54,12 +54,19 @@ body {
 .footer button {
   background-color: white;
   border: 1px solid transparent;
-  padding: 5px 10px; /* Add some padding for better appearance */
-  transition: border-color 0.3s; /* This makes the hover effect smooth */
+  padding: 5px 10px;
+  transition: border-color 0.3s;
+}
+.footer .selected {
+  border-color: #000;
 }
 
-.footer button:hover {
-  border-color: #000; /* Black border on hover */
+.footer .unselected {
+  border-color: transparent;
+}
+
+.footer .unselected:hover {
+  border-color: #000;
 }
 
 /* Expand the input field */
