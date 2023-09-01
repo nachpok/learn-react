@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
-import { Item } from "./store";
+import { Item } from "./ToDoStore";
 export interface ListItemProps {
   item: Item;
   toggle: (itemId: number) => void;

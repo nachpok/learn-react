@@ -1,5 +1,6 @@
 import { action, computed, observable } from "mobx";
-// import Item from "./Item";
+import { database } from "../firebase";
+import { ref, onValue, set } from "firebase/database";
 
 export interface Item {
   id: number;
@@ -7,15 +8,37 @@ export interface Item {
   isDone: boolean;
 }
 
-export class TodoList {
+export class TodoStore {
   @observable list: Item[] = [];
+  @observable isLoading = true;
 
-  constructor() {}
+  constructor() {
+    const todosRef = ref(database, "todos");
+    onValue(todosRef, (snapshot) => {
+      this.setTodos(snapshot.val() || []);
+    });
 
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 1);
+  }
+
+  @computed
+  get todos() {
+    if (this.isLoading) {
+      throw new Promise((resolve) => setTimeout(resolve, 900)); // you can replace this with a relevant promise
+    }
+    return this.list;
+  }
+  @action
+  setTodos(todos: Item[]) {
+    this.list = todos;
+  }
   @action
   addTodo = (text: string) => {
     const item = { id: Date.now(), text: text, isDone: false };
     this.list.push(item);
+    set(ref(database, "todos"), this.list);
   };
 
   @action
@@ -24,10 +47,12 @@ export class TodoList {
     if (index !== -1) {
       this.list.splice(index, 1);
     }
+    set(ref(database, "todos"), this.list);
   };
   @action
   removeList = () => {
     this.list = [];
+    set(ref(database, "todos"), this.list);
   };
 
   @action
@@ -49,5 +74,5 @@ export class TodoList {
   }
 }
 
-// const store = new TodoList();
-// export default store;
+const store = new TodoStore();
+export default store;

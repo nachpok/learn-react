@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Item, TodoList } from "./store";
+import store, { Item, TodoStore } from "./ToDoStore";
 import ListItem from "./ListItem";
 import { observer } from "mobx-react";
 import Footer from "../ToDoReact/Footer";
+import { reaction } from "mobx";
 export enum Mode {
   all = "all",
   active = "active",
   completed = "completed",
 }
-const store = new TodoList();
 
 function ListX() {
   const [mode, setMode] = useState<Mode>(Mode.all);
   // TODO why is it not rerendring and I need to use a useState to trigger??
-  const [parentState, setParentState] = useState<number>(0);
+  const [_, forceUpdate] = useState<number>();
   const handleToggle = (itemId: number) => {
     store.toggleTodo(itemId);
-    setParentState(Date.now());
+    forceUpdate(Date.now());
   };
   const handleRemove = (item: Item) => {
     store.removeTodo(item);
-    setParentState(Date.now());
+    forceUpdate(Date.now());
   };
   const handleClear = () => {
     store.removeList();
-    setParentState(Date.now());
+    forceUpdate(Date.now());
   };
   const filterMode = (item: Item) => {
     return (
@@ -33,7 +33,7 @@ function ListX() {
       (!item.isDone && mode === Mode.active)
     );
   };
-  const listComponents = store.list
+  const listComponents = store.todos
     .filter((item) => filterMode(item))
     .map((item) => {
       return (
@@ -57,6 +57,9 @@ function ListX() {
     setInput(event.target.value);
   };
 
+  if (store.isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <div
       className="listComponent"
