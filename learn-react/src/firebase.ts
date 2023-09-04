@@ -1,17 +1,78 @@
-import { initializeApp } from "firebase/app";
-import "firebase/database";
-import { getDatabase } from "firebase/database";
-const firebaseConfig = {
-  apiKey: "AIzaSyD55ueen4mvqc79_3uAhAvrXavUxeuGaG8",
-  authDomain: "todo-9d7e3.firebaseapp.com",
-  projectId: "todo-9d7e3",
-  storageBucket: "todo-9d7e3.appspot.com",
-  messagingSenderId: "334618321060",
-  appId: "1:334618321060:web:b9962da1162fd635e28631",
-  measurementId: "G-125X9W4B0W",
-};
+import { FirebaseApp, initializeApp } from "firebase/app";
+import { Auth, getAuth } from "firebase/auth";
+import {
+  DataSnapshot,
+  Database,
+  getDatabase,
+  onValue,
+  ref,
+  remove,
+  set,
+  update,
+} from "firebase/database";
+import { Item } from "./ToDoX/ToDoStore";
+// import firebaseui from "firebaseui";
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId: string;
+}
 
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+export default class Firebase {
+  path: string;
+  firebaseConfig: FirebaseConfig;
+  app: FirebaseApp;
+  database: Database;
+  auth: Auth;
+  // authUi: firebaseui.auth.AuthUI;
+  constructor(refPath: string) {
+    this.firebaseConfig = {
+      apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
 
-export { app, database };
+      authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "",
+      projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "",
+      storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "",
+      messagingSenderId:
+        process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "",
+      appId: process.env.REACT_APP_FIREBASE_APP_ID || "",
+      measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "",
+    };
+    this.path = refPath;
+    this.app = initializeApp(this.firebaseConfig);
+    this.database = getDatabase(this.app);
+    this.auth = getAuth(this.app);
+    // this.authUi = new firebaseui.auth.AuthUI(this.auth);
+  }
+
+  getDbRef() {
+    return ref(this.database, this.path);
+  }
+  //get initial state and listen for changes
+  onDbValue(callback: (snapshot: DataSnapshot) => void) {
+    const ref = this.getDbRef();
+    onValue(ref, callback);
+  }
+
+  clearDb() {
+    const ref = this.getDbRef();
+    set(ref, null);
+  }
+
+  setDbItemValue(item: Item) {
+    const itemRef = ref(this.database, `${this.path}/${item.id}`);
+    set(itemRef, item);
+  }
+  //ToDo update change not item
+  updateItemValue(item: Item) {
+    const itemRef = ref(this.database, `${this.path}/${item.id}`);
+    update(itemRef, item);
+  }
+  removeItemValue(item: Item) {
+    const itemRef = ref(this.database, `${this.path}/${item.id}`);
+    remove(itemRef);
+  }
+}

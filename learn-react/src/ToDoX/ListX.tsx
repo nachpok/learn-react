@@ -17,6 +17,7 @@ function ListX() {
   const handleRemove = (item: Item) => {
     store.removeTodo(item);
   };
+
   const handleClear = () => {
     store.removeList();
   };
