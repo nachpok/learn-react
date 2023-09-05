@@ -47,7 +47,9 @@ export default class Firebase {
     this.auth = getAuth(this.app);
     // this.authUi = new firebaseui.auth.AuthUI(this.auth);
   }
-
+  getAuth() {
+    return this.auth;
+  }
   getDbRef() {
     return ref(this.database, this.path);
   }

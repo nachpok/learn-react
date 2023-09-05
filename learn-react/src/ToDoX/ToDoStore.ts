@@ -7,7 +7,7 @@ export interface Item {
   text: string;
   isDone: boolean;
 }
-const firebase = new Firebase("todos");
+export const firebase = new Firebase("todos");
 export class TodoStore {
   @observable list: Item[] = [];
   @observable isLoading = true;
