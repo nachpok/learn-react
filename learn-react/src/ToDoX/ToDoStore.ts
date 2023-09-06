@@ -1,21 +1,22 @@
 import { action, computed, makeAutoObservable, observable } from "mobx";
 // import { ref, onValue, set } from "firebase/database";
 import Firebase from "../Firebase";
+// import { firebase } from "../App";
 
 export interface Item {
   id: number;
   text: string;
   isDone: boolean;
 }
-export const firebase = new Firebase("todos");
+// export const firebase = new Firebase("todos");
 export class TodoStore {
   @observable list: Item[] = [];
   @observable isLoading = true;
-
-  constructor() {
+  firebase: Firebase;
+  constructor(firebase: Firebase) {
     makeAutoObservable(this);
-
-    firebase.onDbValue((snapshot) => {
+    this.firebase = firebase;
+    firebase.onDbValue((snapshot: any) => {
       if (snapshot.exists()) {
         const list = Object.values(snapshot.val()) as Item[];
         this.setTodos(list || []);
@@ -37,7 +38,7 @@ export class TodoStore {
   addTodo = (text: string) => {
     const item = { id: Date.now(), text: text, isDone: false };
     this.list.push(item);
-    firebase.setDbItemValue(item);
+    this.firebase.setDbItemValue(item);
   };
 
   @action
@@ -46,13 +47,13 @@ export class TodoStore {
     if (index !== -1) {
       this.list.splice(index, 1);
     }
-    firebase.removeItemValue(todo);
+    this.firebase.removeItemValue(todo);
   };
 
   @action
   removeList = () => {
     this.list = [];
-    firebase.clearDb();
+    this.firebase.clearDb();
   };
 
   @action
@@ -60,7 +61,7 @@ export class TodoStore {
     const todo = this.list.find((todo) => todo.id === todoId);
     if (todo) {
       todo.isDone = !todo.isDone;
-      firebase.updateItemValue(todo);
+      this.firebase.updateItemValue(todo);
     }
   };
 
@@ -75,5 +76,4 @@ export class TodoStore {
   }
 }
 
-const store = new TodoStore();
-export default store;
+export default TodoStore;

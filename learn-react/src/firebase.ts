@@ -1,5 +1,11 @@
 import { FirebaseApp, initializeApp } from "firebase/app";
-import { Auth, getAuth } from "firebase/auth";
+import {
+  Auth,
+  createUserWithEmailAndPassword,
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import {
   DataSnapshot,
   Database,
@@ -32,7 +38,6 @@ export default class Firebase {
   constructor(refPath: string) {
     this.firebaseConfig = {
       apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
-
       authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "",
       projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "",
       storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "",
@@ -77,4 +82,26 @@ export default class Firebase {
     const itemRef = ref(this.database, `${this.path}/${item.id}`);
     remove(itemRef);
   }
+
+  async signUpWithEmail(email: string, password: string): Promise<void> {
+    try {
+      await createUserWithEmailAndPassword(this.auth, email, password);
+    } catch (error: any) {
+      console.error("Error signing up with email and password", error);
+      throw error;
+    }
+  }
+  async signInWithEmail(email: string, password: string): Promise<void> {
+    try {
+      await signInWithEmailAndPassword(this.auth, email, password);
+    } catch (error) {
+      console.error("Error signing in with email and password", error);
+      throw error;
+    }
+  }
+
+  logout = () => {
+    signOut(this.auth);
+  };
+  //TODO password reset
 }

@@ -1,15 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Firebase from "../Firebase";
-
+import { AuthStateHook, useAuthState } from "react-firebase-hooks/auth";
+import { useNavigate } from "react-router-dom";
+export enum LogType {
+  login = "login",
+  signin = "signin",
+}
 interface Props {
   firebase: Firebase;
+  type: LogType;
 }
 
-export const SignUp: React.FC<Props> = ({ firebase }) => {
+export const Login: React.FC<Props> = ({ firebase, type }) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [validEmail, setValidEmail] = useState<boolean>(false);
   const [validPassword, setValidPassword] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const [user, loading, error] = useAuthState(firebase.auth);
+
+  useEffect(() => {
+    if (loading) {
+      //TODO loading screen
+      return;
+    }
+    if (user) navigate("/todoMobX");
+  }, [user, loading]);
+
   const emailRegex = new RegExp(
     /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
   );
@@ -29,8 +46,9 @@ export const SignUp: React.FC<Props> = ({ firebase }) => {
   };
 
   const handleSubmit = () => {
-    console.log(`email: ${email}, password: ${password}`);
-    firebase.signUpWithEmail(email, password);
+    type === LogType.login
+      ? firebase.signInWithEmail(email, password)
+      : firebase.signUpWithEmail(email, password);
   };
   return (
     <form>
@@ -60,11 +78,9 @@ export const SignUp: React.FC<Props> = ({ firebase }) => {
       </div>
       <div>
         <button disabled={!validPassword && !validEmail} onClick={handleSubmit}>
-          Submit
+          {type === LogType.login ? "Log In" : "Sign UP"}
         </button>
       </div>
     </form>
   );
 };
-
-export default SignUp;
