@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import TodoStore, { Item } from "./ToDoStore";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useNavigate } from "react-router-dom";
 import ListItem from "./ListItem";
 import { observer } from "mobx-react";
-import Footer from "../ToDoReact/Footer";
+import Footer from "./Footer";
+import "./list.css";
 export enum Mode {
   all = "all",
   active = "active",
@@ -18,7 +18,6 @@ export const ListX: React.FC<Props> = ({ store }) => {
   const [user, loading, error] = useAuthState(store.firebase.auth);
   const [mode, setMode] = useState<Mode>(Mode.all);
 
-  const navigate = useNavigate();
   const handleToggle = (itemId: number) => {
     store.toggleTodo(itemId);
   };

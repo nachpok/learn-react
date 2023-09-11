@@ -16,7 +16,7 @@ import {
   set,
   update,
 } from "firebase/database";
-import { Item } from "./ToDoX/ToDoStore";
+import { Item } from "./ToDo/ToDoStore";
 // import firebaseui from "firebaseui";
 interface FirebaseConfig {
   apiKey: string;
@@ -84,6 +84,9 @@ export default class Firebase {
   }
 
   async signUpWithEmail(email: string, password: string): Promise<void> {
+    console.log(
+      `Firebase.signUpWithEmail(email: ${email}, password: ${password})`
+    );
     try {
       await createUserWithEmailAndPassword(this.auth, email, password);
     } catch (error: any) {
