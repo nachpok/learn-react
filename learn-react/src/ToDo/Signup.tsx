@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, Button, Card, Form, Input, InputRef } from "antd";
 import { useAuth } from "../Context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,11 +13,16 @@ function Signup() {
   const emailRef = useRef<InputRef>(null);
   const passwordRef = useRef<InputRef>(null);
   const passwordConfRef = useRef<InputRef>(null);
-  const { signup } = useAuth();
+  const { currentUser, signup, googleLogin } = useAuth();
   const [error, setError] = useState<Error>(Error.none);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (currentUser != null) {
+      navigate("/");
+    }
+  }, [currentUser]);
   // const emailRegex = new RegExp(
   //   /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
   // );
@@ -54,9 +59,15 @@ function Signup() {
     }
     setLoading(false);
   };
-
+  const googleSignIn = async () => {
+    try {
+      await googleLogin();
+    } catch (error) {
+      console.log(`Signup.googleSignIn.error: ${error}`);
+    }
+  };
   return (
-    <Card>
+    <Card style={{ marginTop: "1rem" }}>
       <h2>Sign Up</h2>
 
       <Form
@@ -96,12 +107,25 @@ function Signup() {
         )}
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" disabled={loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={loading}
+            style={{ width: "100%" }}
+          >
             Sign up
           </Button>
         </Form.Item>
       </Form>
-      <div>
+      <Button
+        type="default"
+        onClick={googleSignIn}
+        disabled={loading}
+        style={{ width: "100%" }}
+      >
+        Sign up with Google
+      </Button>
+      <div style={{ paddingTop: "1rem" }}>
         Already have an account?<Link to="/login">Log In</Link>
       </div>
     </Card>

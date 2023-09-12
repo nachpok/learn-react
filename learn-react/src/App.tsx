@@ -9,22 +9,16 @@ import { AuthProvider } from "./Context/AuthContext";
 import Login from "./ToDo/Login";
 import { PrivateRoutes } from "./ToDo/PrivateRoutes";
 
-// const firebase = new Firebase("todos");
-// const store = new TodoStore(firebase);
-
 const App: React.FC = () => {
   const [firebase, setFirebase] = useState<Firebase | null>(null);
-  const [store, setStore] = useState<TodoStore | null>(null);
 
   useEffect(() => {
     const fbInstance = new Firebase("todos");
-    const storeInstance = new TodoStore(fbInstance);
 
     setFirebase(fbInstance);
-    setStore(storeInstance);
   }, []);
 
-  if (!firebase || !store) {
+  if (!firebase) {
     return <div>Loading...</div>;
   }
 
@@ -35,7 +29,7 @@ const App: React.FC = () => {
           <Route path="signup" element={<Signup />} />
           <Route path="login" element={<Login />} />
           <Route element={<PrivateRoutes />}>
-            <Route path="/" element={<List store={store} />} />
+            <Route path="/" element={<List firebase={firebase} />} />
           </Route>
           <Route path="*" element={<h1>Page not found</h1>} />
         </Routes>

@@ -5,6 +5,9 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
 } from "firebase/auth";
 import {
   DataSnapshot,
@@ -17,7 +20,8 @@ import {
   update,
 } from "firebase/database";
 import { Item } from "./ToDo/ToDoStore";
-// import firebaseui from "firebaseui";
+import { get } from "http";
+import { useNavigate } from "react-router-dom";
 interface FirebaseConfig {
   apiKey: string;
   authDomain: string;
@@ -34,7 +38,7 @@ export default class Firebase {
   app: FirebaseApp;
   database: Database;
   auth: Auth;
-  // authUi: firebaseui.auth.AuthUI;
+  provider: GoogleAuthProvider;
   constructor(refPath: string) {
     this.firebaseConfig = {
       apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
@@ -50,10 +54,14 @@ export default class Firebase {
     this.app = initializeApp(this.firebaseConfig);
     this.database = getDatabase(this.app);
     this.auth = getAuth(this.app);
+    this.provider = new GoogleAuthProvider();
     // this.authUi = new firebaseui.auth.AuthUI(this.auth);
   }
   getAuth() {
     return this.auth;
+  }
+  getProvider() {
+    return this.provider;
   }
   getDbRef() {
     return ref(this.database, this.path);
@@ -103,6 +111,12 @@ export default class Firebase {
     }
   }
 
+  async loginWithGoogle(): Promise<void> {
+    console.log("Signin with Google");
+    try {
+      const login = signInWithRedirect(this.getAuth(), this.getProvider());
+    } catch (error) {}
+  }
   logout = async () => {
     await signOut(this.auth);
   };

@@ -1,6 +1,6 @@
 import { action, computed, makeAutoObservable, observable } from "mobx";
-// import { ref, onValue, set } from "firebase/database";
 import Firebase from "../Firebase";
+// import { ref, onValue, set } from "firebase/database";
 // import { firebase } from "../App";
 
 export interface Item {
@@ -8,7 +8,7 @@ export interface Item {
   text: string;
   isDone: boolean;
 }
-// export const firebase = new Firebase("todos");
+
 export class TodoStore {
   @observable list: Item[] = [];
   @observable isLoading = true;
@@ -16,6 +16,7 @@ export class TodoStore {
   constructor(firebase: Firebase) {
     makeAutoObservable(this);
     this.firebase = firebase;
+
     firebase.onDbValue((snapshot: any) => {
       if (snapshot.exists()) {
         const list = Object.values(snapshot.val()) as Item[];

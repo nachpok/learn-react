@@ -19,6 +19,7 @@ interface AuthProviderProps {
 export function AuthProvider({ firebase, children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>();
   const [loading, setLoading] = useState<boolean>(true);
+
   function signup(email: string, password: string) {
     return firebase.signUpWithEmail(email, password);
   }
@@ -26,7 +27,11 @@ export function AuthProvider({ firebase, children }: AuthProviderProps) {
     return firebase.signInWithEmail(email, password);
   }
   function logout() {
+    setCurrentUser(null);
     return firebase.logout();
+  }
+  function googleLogin() {
+    return firebase.loginWithGoogle();
   }
   useEffect(() => {
     const unsubscribe = firebase.auth.onAuthStateChanged((user) => {
@@ -36,7 +41,13 @@ export function AuthProvider({ firebase, children }: AuthProviderProps) {
     return unsubscribe;
   }, []);
 
-  const value = { currentUser, signup, login, logout };
+  const value = {
+    currentUser,
+    signup,
+    login,
+    logout,
+    googleLogin,
+  };
   //
   return (
     <AuthContext.Provider value={value}>

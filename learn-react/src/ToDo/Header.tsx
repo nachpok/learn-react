@@ -5,12 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 export default function Header() {
   const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
 
   const handleLogOut = async () => {
     try {
       await logout();
-      navigate("/login");
     } catch (e) {}
   };
   return (

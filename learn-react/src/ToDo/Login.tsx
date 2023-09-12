@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, Button, Card, Form, Input, InputRef } from "antd";
 import { useAuth } from "../Context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -11,11 +11,15 @@ enum Error {
 export default function Login() {
   const emailRef = useRef<InputRef>(null);
   const passwordRef = useRef<InputRef>(null);
-  const { login } = useAuth();
+  const { currentUser, login, googleLogin } = useAuth();
   const [error, setError] = useState<Error>(Error.none);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-
+  useEffect(() => {
+    if (currentUser != null) {
+      navigate("/");
+    }
+  }, [currentUser]);
   const onFinish = async () => {
     try {
       setError(Error.none);
@@ -42,8 +46,15 @@ export default function Login() {
     setLoading(false);
   };
 
+  const googleSignIn = async () => {
+    try {
+      await googleLogin();
+    } catch (error) {
+      console.log(`Signup.googleSignIn.error: ${error}`);
+    }
+  };
   return (
-    <Card>
+    <Card style={{ marginTop: "1rem" }}>
       <h2>Log In</h2>
 
       <Form
@@ -74,12 +85,25 @@ export default function Login() {
         )}
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" disabled={loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={loading}
+            style={{ width: "100%" }}
+          >
             Log In
           </Button>
         </Form.Item>
       </Form>
-      <div>
+      <Button
+        type="default"
+        onClick={googleSignIn}
+        disabled={loading}
+        style={{ width: "100%" }}
+      >
+        Sign In with Google
+      </Button>
+      <div style={{ paddingTop: "1rem" }}>
         Don't have an account? <Link to="/signup">Sign Up</Link>
       </div>
     </Card>

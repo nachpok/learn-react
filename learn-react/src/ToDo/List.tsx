@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TodoStore, { Item } from "./ToDoStore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import ListItem from "./ListItem";
@@ -6,17 +6,30 @@ import { observer } from "mobx-react";
 import Footer from "./Footer";
 import "./list.css";
 import Header from "./Header";
+import Firebase from "../Firebase";
 export enum Mode {
   all = "all",
   active = "active",
   completed = "completed",
 }
 interface Props {
-  store: TodoStore;
+  firebase: Firebase;
 }
 
-export const List: React.FC<Props> = ({ store }) => {
+export const List: React.FC<Props> = ({ firebase }) => {
   const [mode, setMode] = useState<Mode>(Mode.all);
+  const [store, setStore] = useState<TodoStore | null>(null);
+  const [input, setInput] = useState<string>("");
+
+  useEffect(() => {
+    const storeInstance = new TodoStore(firebase);
+
+    setStore(storeInstance);
+  }, []);
+
+  if (!store) {
+    return <></>;
+  }
 
   const handleToggle = (itemId: number) => {
     store.toggleTodo(itemId);
@@ -48,7 +61,6 @@ export const List: React.FC<Props> = ({ store }) => {
       );
     });
 
-  const [input, setInput] = useState<string>("");
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter") {
       store.addTodo(input);
