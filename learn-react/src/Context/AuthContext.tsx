@@ -25,6 +25,9 @@ export function AuthProvider({ firebase, children }: AuthProviderProps) {
   function login(email: string, password: string) {
     return firebase.signInWithEmail(email, password);
   }
+  function logout() {
+    return firebase.logout();
+  }
   useEffect(() => {
     const unsubscribe = firebase.auth.onAuthStateChanged((user) => {
       setLoading(false);
@@ -33,7 +36,7 @@ export function AuthProvider({ firebase, children }: AuthProviderProps) {
     return unsubscribe;
   }, []);
 
-  const value = { currentUser, signup, login };
+  const value = { currentUser, signup, login, logout };
   //
   return (
     <AuthContext.Provider value={value}>

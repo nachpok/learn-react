@@ -103,8 +103,8 @@ export default class Firebase {
     }
   }
 
-  logout = () => {
-    signOut(this.auth);
+  logout = async () => {
+    await signOut(this.auth);
   };
   //TODO password reset
 }

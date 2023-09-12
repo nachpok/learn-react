@@ -5,6 +5,7 @@ import ListItem from "./ListItem";
 import { observer } from "mobx-react";
 import Footer from "./Footer";
 import "./list.css";
+import Header from "./Header";
 export enum Mode {
   all = "all",
   active = "active",
@@ -14,8 +15,7 @@ interface Props {
   store: TodoStore;
 }
 
-export const ListX: React.FC<Props> = ({ store }) => {
-  const [user, loading, error] = useAuthState(store.firebase.auth);
+export const List: React.FC<Props> = ({ store }) => {
   const [mode, setMode] = useState<Mode>(Mode.all);
 
   const handleToggle = (itemId: number) => {
@@ -63,28 +63,31 @@ export const ListX: React.FC<Props> = ({ store }) => {
     return <div>Loading...</div>;
   }
   return (
-    <div
-      className="listComponent"
-      style={{ textAlign: "center", width: "350px" }}
-    >
-      <div className="listContainer ">
-        <h1>ToDoX</h1>
-        <input
-          placeholder="What needs to be done?"
-          value={input}
-          onKeyDown={handleKeyDown}
-          onChange={handleInputChange}
+    <>
+      <Header />
+      <div
+        className="listComponent"
+        style={{ textAlign: "center", width: "350px" }}
+      >
+        <div className="listContainer ">
+          <h1>ToDoX</h1>
+          <input
+            placeholder="What needs to be done?"
+            value={input}
+            onKeyDown={handleKeyDown}
+            onChange={handleInputChange}
+          />
+          {listComponents}
+        </div>
+        <Footer
+          listLen={store.list.filter((item) => !item.isDone).length}
+          mode={mode}
+          setMode={setMode}
+          setList={handleClear}
         />
-        {listComponents}
       </div>
-      <Footer
-        listLen={store.list.filter((item) => !item.isDone).length}
-        mode={mode}
-        setMode={setMode}
-        setList={handleClear}
-      />
-    </div>
+    </>
   );
 };
 
-export default observer(ListX);
+export default observer(List);

@@ -1,19 +1,29 @@
 import React, { useRef, useState } from "react";
 import { Alert, Button, Card, Form, Input, InputRef } from "antd";
 import { useAuth } from "../Context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
 
 enum Error {
-  error = "error",
   none = "",
+  passwordsDontMatch = "Passwords do not match",
+  passwordToShort = "Password must be at least 6 characters",
 }
 function Signup() {
   const emailRef = useRef<InputRef>(null);
   const passwordRef = useRef<InputRef>(null);
   const passwordConfRef = useRef<InputRef>(null);
   const { signup } = useAuth();
-  const [status, setStatus] = useState<Error>(Error.none);
+  const [error, setError] = useState<Error>(Error.none);
   const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
+
+  // const emailRegex = new RegExp(
+  //   /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+  // );
+  // const passwordRegex = new RegExp(
+  //   "^(?=.*[A-Z])(?=.*[a-z])(?=.*[\\d\\W]).{8,16}$"
+  // );
 
   const onFinish = async () => {
     if (
@@ -22,17 +32,25 @@ function Signup() {
     ) {
       console.log(`${passwordRef.current?.input?.value} !==
       ${passwordConfRef.current?.input?.value}`);
-      return setStatus(Error.error);
+      return setError(Error.passwordsDontMatch);
     }
     try {
-      setStatus(Error.none);
+      setError(Error.none);
       setLoading(true);
       await signup(
         emailRef.current?.input?.value,
         passwordRef.current?.input?.value
       );
+      navigate("/");
     } catch (e) {
-      //Todo handle error
+      if (e instanceof FirebaseError) {
+        if (e.code === "auth/weak-password") {
+          setError(Error.passwordToShort);
+        }
+        console.log(`Firebase Error: ${e.code}`);
+      } else {
+        console.log(`Other Error: ${e}`);
+      }
     }
     setLoading(false);
   };
@@ -54,7 +72,7 @@ function Signup() {
         </Form.Item>
         <Form.Item>
           <Input.Password
-            status={status}
+            status={error ? "error" : undefined}
             placeholder="Password"
             ref={passwordRef}
             required
@@ -62,16 +80,16 @@ function Signup() {
         </Form.Item>
         <Form.Item>
           <Input.Password
-            status={status}
+            status={error ? "error" : undefined}
             placeholder="Password Confirmation"
             ref={passwordConfRef}
             required
           />
         </Form.Item>
 
-        {status ? (
+        {error ? (
           <Form.Item>
-            <Alert description="Passwords do not match" type="error" />
+            <Alert description={error} type="error" />
           </Form.Item>
         ) : (
           <></>

@@ -2,9 +2,11 @@ import React, { useRef, useState } from "react";
 import { Alert, Button, Card, Form, Input, InputRef } from "antd";
 import { useAuth } from "../Context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
 enum Error {
-  error = "error",
   none = "",
+  wrongPassword = "Password does not match email",
+  default = "Failed to sign in",
 }
 export default function Login() {
   const emailRef = useRef<InputRef>(null);
@@ -24,7 +26,18 @@ export default function Login() {
       );
       navigate("/");
     } catch (e) {
-      setError(Error.error);
+      if (e instanceof FirebaseError) {
+        if (
+          e.code === "auth/wrong-password" ||
+          e.code === "auth/user-not-found"
+        ) {
+          setError(Error.wrongPassword);
+        }
+        console.log(`Firebase Error: ${e.code}`);
+      } else {
+        setError(Error.default);
+        console.log(`Other Error: ${e}`);
+      }
     }
     setLoading(false);
   };
@@ -46,7 +59,7 @@ export default function Login() {
         </Form.Item>
         <Form.Item>
           <Input.Password
-            status={error}
+            status={error ? "error" : undefined}
             placeholder="Password"
             ref={passwordRef}
             required
@@ -54,7 +67,7 @@ export default function Login() {
         </Form.Item>
         {error ? (
           <Form.Item>
-            <Alert description="Failed to sign in" type="error" />
+            <Alert description={error} type="error" />
           </Form.Item>
         ) : (
           <></>
