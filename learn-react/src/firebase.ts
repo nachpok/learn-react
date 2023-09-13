@@ -32,14 +32,15 @@ interface FirebaseConfig {
   measurementId: string;
 }
 
+//TODO deal with path and database, is path! ok??
 export default class Firebase {
-  path: string;
+  path!: string;
   firebaseConfig: FirebaseConfig;
   app: FirebaseApp;
-  database: Database;
+  database!: Database;
   auth: Auth;
   provider: GoogleAuthProvider;
-  constructor(refPath: string) {
+  constructor() {
     this.firebaseConfig = {
       apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
       authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "",
@@ -50,12 +51,14 @@ export default class Firebase {
       appId: process.env.REACT_APP_FIREBASE_APP_ID || "",
       measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "",
     };
-    this.path = refPath;
+
     this.app = initializeApp(this.firebaseConfig);
-    this.database = getDatabase(this.app);
     this.auth = getAuth(this.app);
     this.provider = new GoogleAuthProvider();
-    // this.authUi = new firebaseui.auth.AuthUI(this.auth);
+  }
+  setUserPath(userId: string) {
+    this.path = `users/${userId}`;
+    this.database = getDatabase(this.app);
   }
   getAuth() {
     return this.auth;
@@ -114,7 +117,7 @@ export default class Firebase {
   async loginWithGoogle(): Promise<void> {
     console.log("Signin with Google");
     try {
-      const login = signInWithRedirect(this.getAuth(), this.getProvider());
+      signInWithRedirect(this.getAuth(), this.getProvider());
     } catch (error) {}
   }
   logout = async () => {

@@ -9,6 +9,7 @@ enum Error {
   passwordsDontMatch = "Passwords do not match",
   passwordToShort = "Password must be at least 6 characters",
 }
+
 function Signup() {
   const emailRef = useRef<InputRef>(null);
   const passwordRef = useRef<InputRef>(null);

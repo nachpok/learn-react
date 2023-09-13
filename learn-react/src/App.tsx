@@ -13,7 +13,7 @@ const App: React.FC = () => {
   const [firebase, setFirebase] = useState<Firebase | null>(null);
 
   useEffect(() => {
-    const fbInstance = new Firebase("todos");
+    const fbInstance = new Firebase();
 
     setFirebase(fbInstance);
   }, []);

@@ -23,7 +23,6 @@ export const List: React.FC<Props> = ({ firebase }) => {
 
   useEffect(() => {
     const storeInstance = new TodoStore(firebase);
-
     setStore(storeInstance);
   }, []);
 
