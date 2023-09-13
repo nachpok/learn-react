@@ -14,7 +14,7 @@ function Signup() {
   const emailRef = useRef<InputRef>(null);
   const passwordRef = useRef<InputRef>(null);
   const passwordConfRef = useRef<InputRef>(null);
-  const { currentUser, signup, googleLogin } = useAuth();
+  const { currentUser, signup, googleLogin, githubSignIn } = useAuth();
   const [error, setError] = useState<Error>(Error.none);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -118,14 +118,26 @@ function Signup() {
           </Button>
         </Form.Item>
       </Form>
-      <Button
-        type="default"
-        onClick={googleSignIn}
-        disabled={loading}
-        style={{ width: "100%" }}
-      >
-        Sign up with Google
-      </Button>
+      <div>
+        <Button
+          type="default"
+          onClick={googleSignIn}
+          disabled={loading}
+          style={{ width: "100%" }}
+        >
+          Sign In with Google
+        </Button>
+      </div>
+      <div style={{ paddingTop: "1rem" }}>
+        <Button
+          type="default"
+          onClick={githubSignIn}
+          disabled={loading}
+          style={{ width: "100%" }}
+        >
+          Sign In with Github
+        </Button>
+      </div>
       <div style={{ paddingTop: "1rem" }}>
         Already have an account?<Link to="/login">Log In</Link>
       </div>

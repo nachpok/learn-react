@@ -33,6 +33,12 @@ export function AuthProvider({ firebase, children }: AuthProviderProps) {
   function googleLogin() {
     return firebase.loginWithGoogle();
   }
+  function githubLogin() {
+    return firebase.loginWithGithub();
+  }
+  function resetPassword(email: string) {
+    return firebase.resetPassword(email);
+  }
   useEffect(() => {
     const unsubscribe = firebase.auth.onAuthStateChanged((user) => {
       setLoading(false);
@@ -50,6 +56,8 @@ export function AuthProvider({ firebase, children }: AuthProviderProps) {
     login,
     logout,
     googleLogin,
+    githubLogin,
+    resetPassword,
   };
   //
   return (

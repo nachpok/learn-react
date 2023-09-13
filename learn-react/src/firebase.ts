@@ -8,6 +8,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
+  sendPasswordResetEmail,
+  GithubAuthProvider,
 } from "firebase/auth";
 import {
   DataSnapshot,
@@ -39,7 +41,8 @@ export default class Firebase {
   app: FirebaseApp;
   database!: Database;
   auth: Auth;
-  provider: GoogleAuthProvider;
+  googleProvider: GoogleAuthProvider;
+  githubProvider: GithubAuthProvider;
   constructor() {
     this.firebaseConfig = {
       apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
@@ -54,7 +57,8 @@ export default class Firebase {
 
     this.app = initializeApp(this.firebaseConfig);
     this.auth = getAuth(this.app);
-    this.provider = new GoogleAuthProvider();
+    this.googleProvider = new GoogleAuthProvider();
+    this.githubProvider = new GithubAuthProvider();
   }
   setUserPath(userId: string) {
     this.path = `users/${userId}`;
@@ -63,8 +67,11 @@ export default class Firebase {
   getAuth() {
     return this.auth;
   }
-  getProvider() {
-    return this.provider;
+  getGoogleProvider() {
+    return this.googleProvider;
+  }
+  getGithubProvider() {
+    return this.githubProvider;
   }
   getDbRef() {
     return ref(this.database, this.path);
@@ -101,7 +108,7 @@ export default class Firebase {
     try {
       await createUserWithEmailAndPassword(this.auth, email, password);
     } catch (error: any) {
-      console.error("Error signing up with email and password", error);
+      console.error("Error signing up with email and password:", error);
       throw error;
     }
   }
@@ -109,15 +116,27 @@ export default class Firebase {
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
-      console.error("Error signing in with email and password", error);
+      console.error("Error signing in with email and password:", error);
       throw error;
     }
   }
-
+  async resetPassword(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+    } catch (error) {
+      console.error("Error resetting password:", error);
+    }
+  }
   async loginWithGoogle(): Promise<void> {
     console.log("Signin with Google");
     try {
-      signInWithRedirect(this.getAuth(), this.getProvider());
+      signInWithRedirect(this.getAuth(), this.getGoogleProvider());
+    } catch (error) {}
+  }
+  async loginWithGithub(): Promise<void> {
+    console.log("Signin with Github");
+    try {
+      signInWithRedirect(this.getAuth(), this.getGithubProvider());
     } catch (error) {}
   }
   logout = async () => {

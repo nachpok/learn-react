@@ -11,7 +11,7 @@ enum Error {
 export default function Login() {
   const emailRef = useRef<InputRef>(null);
   const passwordRef = useRef<InputRef>(null);
-  const { currentUser, login, googleLogin } = useAuth();
+  const { currentUser, login, googleLogin, githubLogin } = useAuth();
   const [error, setError] = useState<Error>(Error.none);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -53,6 +53,13 @@ export default function Login() {
       console.log(`Signup.googleSignIn.error: ${error}`);
     }
   };
+  const githubSignIn = async () => {
+    try {
+      await githubLogin();
+    } catch (error) {
+      console.log(`Signup.googleSignIn.error: ${error}`);
+    }
+  };
   return (
     <Card style={{ marginTop: "1rem" }}>
       <h2>Log In</h2>
@@ -84,7 +91,7 @@ export default function Login() {
           <></>
         )}
 
-        <Form.Item>
+        <Form.Item style={{ marginBottom: "8px" }}>
           <Button
             type="primary"
             htmlType="submit"
@@ -94,15 +101,30 @@ export default function Login() {
             Log In
           </Button>
         </Form.Item>
+        <div style={{ textAlign: "center", paddingBottom: "12px" }}>
+          <Link to="/reset-password">Forgot Password?</Link>
+        </div>
       </Form>
-      <Button
-        type="default"
-        onClick={googleSignIn}
-        disabled={loading}
-        style={{ width: "100%" }}
-      >
-        Sign In with Google
-      </Button>
+      <div>
+        <Button
+          type="default"
+          onClick={googleSignIn}
+          disabled={loading}
+          style={{ width: "100%" }}
+        >
+          Sign In with Google
+        </Button>
+      </div>
+      <div style={{ paddingTop: "1rem" }}>
+        <Button
+          type="default"
+          onClick={githubSignIn}
+          disabled={loading}
+          style={{ width: "100%" }}
+        >
+          Sign In with Github
+        </Button>
+      </div>
       <div style={{ paddingTop: "1rem" }}>
         Don't have an account? <Link to="/signup">Sign Up</Link>
       </div>

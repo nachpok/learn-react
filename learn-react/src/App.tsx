@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import List from "./ToDo/List";
 import Firebase from "./Firebase";
-import TodoStore from "./ToDo/ToDoStore";
 import Signup from "./ToDo/Signup";
 import { AuthProvider } from "./Context/AuthContext";
 import Login from "./ToDo/Login";
 import { PrivateRoutes } from "./ToDo/PrivateRoutes";
+import ResetPassword from "./ToDo/ResetPassword";
 
 const App: React.FC = () => {
   const [firebase, setFirebase] = useState<Firebase | null>(null);
@@ -28,6 +28,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="signup" element={<Signup />} />
           <Route path="login" element={<Login />} />
+          <Route path="reset-password" element={<ResetPassword />} />
           <Route element={<PrivateRoutes />}>
             <Route path="/" element={<List firebase={firebase} />} />
           </Route>
