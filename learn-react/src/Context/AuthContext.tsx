@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
-import Firebase from "../Firebase";
 import { User } from "firebase/auth";
+import Firebase from "../ToDo/Firebase";
 
 //Todo set user as type of AuthContext
 interface AuthContextType {}

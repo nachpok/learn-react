@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 // import List from "./ToDoReact/List";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import List from "./ToDo/List";
-import Firebase from "./Firebase";
 import Signup from "./ToDo/Signup";
 import { AuthProvider } from "./Context/AuthContext";
 import Login from "./ToDo/Login";
 import { PrivateRoutes } from "./ToDo/PrivateRoutes";
 import ResetPassword from "./ToDo/ResetPassword";
+import Firebase from "./ToDo/Firebase";
 
 const App: React.FC = () => {
   const [firebase, setFirebase] = useState<Firebase | null>(null);

@@ -1,10 +1,11 @@
 import { action, computed, makeAutoObservable, observable } from "mobx";
-import Firebase from "../Firebase";
+import Firebase from "./Firebase";
 // import { ref, onValue, set } from "firebase/database";
 // import { firebase } from "../App";
 
 export interface Item {
   id: number;
+  userId: string;
   text: string;
   isDone: boolean;
 }
@@ -36,8 +37,9 @@ export class TodoStore {
     this.list = todos;
   }
   @action
-  addTodo = (text: string) => {
-    const item = { id: Date.now(), text: text, isDone: false };
+  addTodo = (text: string, userId: string) => {
+    console.log("User ID: ", userId);
+    const item = { id: Date.now(), text: text, isDone: false, userId: userId };
     this.list.push(item);
     this.firebase.setDbItemValue(item);
   };

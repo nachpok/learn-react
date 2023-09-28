@@ -21,9 +21,9 @@ import {
   set,
   update,
 } from "firebase/database";
-import { Item } from "./ToDo/ToDoStore";
 import { get } from "http";
 import { useNavigate } from "react-router-dom";
+import { Item } from "./ToDoStore";
 interface FirebaseConfig {
   apiKey: string;
   authDomain: string;
