@@ -8,6 +8,7 @@ import "./list.css";
 import Header from "./Header";
 import Firebase from "./Firebase";
 import Store from "./store";
+import { api_domain } from "./PScale";
 export enum Mode {
   all = "all",
   active = "active",
@@ -40,8 +41,9 @@ export const List: React.FC<Props> = ({ firebase }) => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
+    console.log("VERCEL_URL: ", api_domain);
     fetch(
-      `https://todo-api-juzg-nairo83kd-nachpok.vercel.app/api/todos/${currentUser.uid}/user/${currentUser.email}/getUser`
+      `https://todo-api-juzg.vercel.app/api/todos/${currentUser.uid}/user/${currentUser.email}/getUser`
     )
       .then((response) => response.json())
       .then((result) => {

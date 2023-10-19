@@ -1,10 +1,10 @@
 import { Todo } from "./List";
-const domain = "https://todo-api-juzg.vercel.app";
+export const api_domain = process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL;
 // const domain = "  http://localhost:3000";
 export async function toggleTodo(todo: Todo) {
   if (todo.userId && todo.id) {
     const res = await fetch(
-      `${domain}/api/todos/${todo.userId}/${todo.id}/toggle`,
+      `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`,
       {
         mode: "no-cors",
       }
@@ -16,7 +16,7 @@ export async function toggleTodo(todo: Todo) {
 export async function deleteTodo(todo: Todo) {
   if (todo.userId && todo.id) {
     const res = await fetch(
-      `${domain}/api/todos/${todo.userId}/${todo.id}/deleteTodo`,
+      `${api_domain}/api/todos/${todo.userId}/${todo.id}/deleteTodo`,
       {
         mode: "no-cors",
       }
@@ -28,7 +28,7 @@ export async function deleteTodo(todo: Todo) {
 export async function createTodo(todo: Todo) {
   if (todo.userId && todo.id && todo.title) {
     const res = await fetch(
-      `${domain}/api/todos/${todo.userId}/${todo.id}/${todo.title}/createTodo`,
+      `${api_domain}/api/todos/${todo.userId}/${todo.id}/${todo.title}/createTodo`,
       {
         mode: "no-cors",
       }
@@ -39,7 +39,7 @@ export async function createTodo(todo: Todo) {
 }
 export async function deleteAllTodos(userId: string) {
   if (userId) {
-    const res = await fetch(`${domain}/api/todos/${userId}/deleteTodos`, {
+    const res = await fetch(`${api_domain}/api/todos/${userId}/deleteTodos`, {
       mode: "no-cors",
     });
   } else {
