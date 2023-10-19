@@ -2,6 +2,7 @@ import { action, computed, makeAutoObservable, observable } from "mobx";
 import Firebase from "./Firebase";
 import { User } from "firebase/auth";
 import { PSUser, Todo } from "./List";
+import { createTodo, deleteAllTodos, deleteTodo, toggleTodo } from "./PScale";
 // import { ref, onValue, set } from "firebase/database";
 // import { firebase } from "../App";
 
@@ -15,10 +16,12 @@ export interface Item {
 export class Store {
   @observable list: Todo[] = [];
   @observable isLoading = true;
+  @observable userId = "";
   constructor(user: PSUser) {
     makeAutoObservable(this);
     this.setTodos(user.todos || []);
     this.isLoading = false;
+    this.userId = user.id;
   }
 
   @computed
@@ -32,7 +35,7 @@ export class Store {
   @action
   addTodo = (title: string, userId: string) => {
     console.log("User ID: ", userId);
-    const item = {
+    const todo = {
       id: Date.now().toString(),
       title: title,
       is_complete: false,
@@ -40,8 +43,8 @@ export class Store {
       created_at: Date.now().toString(),
       updated_at: Date.now().toString(),
     };
-    this.list.push(item);
-    // this.firebase.setDbItemValue(item);
+    this.list.push(todo);
+    createTodo(todo);
   };
 
   @action
@@ -50,13 +53,13 @@ export class Store {
     if (index !== -1) {
       this.list.splice(index, 1);
     }
-    // this.firebase.removeItemValue(todo);
+    deleteTodo(todo);
   };
 
   @action
   removeList = () => {
     this.list = [];
-    // this.firebase.clearDb();
+    deleteAllTodos(this.userId);
   };
 
   @action
@@ -64,7 +67,7 @@ export class Store {
     const todo = this.list.find((todo) => todo.id === todoId);
     if (todo) {
       todo.is_complete = !todo.is_complete;
-      //   this.firebase.updateItemValue(todo);
+      toggleTodo(todo);
     }
   };
 

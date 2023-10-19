@@ -40,13 +40,8 @@ export const List: React.FC<Props> = ({ firebase }) => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    // const storeInstance = new TodoStore(firebase);
-
-    // fetch(
-    //   `https://todo-api-juzg.vercel.app/api/todos/${currentUser.uid}/getUser`
-    // )
     fetch(
-      `http://localhost:3000/api/todos/${currentUser.uid}/user/${currentUser.email}/getUser`
+      `https://todo-api-juzg-nairo83kd-nachpok.vercel.app/api/todos/${currentUser.uid}/user/${currentUser.email}/getUser`
     )
       .then((response) => response.json())
       .then((result) => {
