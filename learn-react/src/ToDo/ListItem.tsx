@@ -1,27 +1,31 @@
 import { observer } from "mobx-react";
-import { Item } from "./ToDoStore";
+import { Todo } from "./List";
 export interface ListItemProps {
-  item: Item;
-  toggle: (itemId: number) => void;
-  remove: (item: Item) => void;
+  todo: Todo;
+  toggle: (itemId: string) => void;
+  remove: (item: Todo) => void;
 }
-function ListItem({ item, toggle, remove }: ListItemProps) {
-  const value = item.isDone ? <s>{item.text}</s> : <span>{item.text}</span>;
+function ListItem({ todo, toggle, remove }: ListItemProps) {
+  const value = todo.is_complete ? (
+    <s>{todo.title}</s>
+  ) : (
+    <span>{todo.title}</span>
+  );
 
   const handleChange = () => {
-    toggle(item.id);
+    toggle(todo.id);
   };
   const handleRemove = () => {
-    remove(item);
+    remove(todo);
   };
 
   return (
-    <div key={item.id} className="listItem">
+    <div key={todo.id} className="listItem">
       <div>
         <input
-          key={item.id}
+          key={todo.id}
           type="checkbox"
-          checked={item.isDone}
+          checked={todo.is_complete}
           onChange={handleChange}
         ></input>
         {value}
