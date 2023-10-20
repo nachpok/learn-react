@@ -1,4 +1,4 @@
-import { action, computed, makeAutoObservable, observable } from "mobx";
+import { action, computed, makeAutoObservable, observable, toJS } from "mobx";
 import Firebase from "./Firebase";
 import { User } from "firebase/auth";
 import { PSUser, Todo } from "./List";
@@ -65,7 +65,7 @@ export class Store {
   @action
   toggleTodo = (todoId: string) => {
     const todo = this.list.find((todo) => todo.id === todoId);
-    console.log("Store.toggleTodo.todo: ", todo);
+    console.log("Store.toggleTodo.todo: ", toJS(todo));
     if (todo) {
       todo.is_complete = !todo.is_complete;
       toggleTodo(todo);
