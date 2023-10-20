@@ -5,7 +5,7 @@ export const api_domain =
 export async function toggleTodo(todo: Todo) {
   try {
     const res = await fetch(
-      `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`
+      `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`
     );
     console.log("PScale.toggle.res: ", res);
   } catch (error) {
