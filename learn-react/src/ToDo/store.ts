@@ -65,6 +65,7 @@ export class Store {
   @action
   toggleTodo = (todoId: string) => {
     const todo = this.list.find((todo) => todo.id === todoId);
+    console.log("Store.toggleTodo.todo: ", todo);
     if (todo) {
       todo.is_complete = !todo.is_complete;
       toggleTodo(todo);

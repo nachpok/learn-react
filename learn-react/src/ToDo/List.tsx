@@ -48,7 +48,6 @@ export const List: React.FC<Props> = ({ firebase }) => {
       .then((response) => response.json())
       .then((result) => {
         const storeInstance = new Store(result);
-        console.log("List.result: ", result);
         setStore(storeInstance);
       })
       .catch((error) => {
