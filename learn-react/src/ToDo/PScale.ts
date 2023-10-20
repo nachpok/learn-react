@@ -6,10 +6,7 @@ export const api_domain =
 export async function toggleTodo(todo: Todo) {
   if (todo.userId && todo.id) {
     const res = await fetch(
-      `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`,
-      {
-        mode: "no-cors",
-      }
+      `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`
     );
   } else {
     throw Error(`Missing data,can't toggle todo: ${JSON.stringify(todo)}`);
@@ -18,10 +15,7 @@ export async function toggleTodo(todo: Todo) {
 export async function deleteTodo(todo: Todo) {
   if (todo.userId && todo.id) {
     const res = await fetch(
-      `${api_domain}/api/todos/${todo.userId}/${todo.id}/deleteTodo`,
-      {
-        mode: "no-cors",
-      }
+      `${api_domain}/api/todos/${todo.userId}/${todo.id}/deleteTodo`
     );
   } else {
     throw Error(`Missing data,can't delete todo: ${JSON.stringify(todo)}`);
@@ -30,10 +24,7 @@ export async function deleteTodo(todo: Todo) {
 export async function createTodo(todo: Todo) {
   if (todo.userId && todo.id && todo.title) {
     const res = await fetch(
-      `${api_domain}/api/todos/${todo.userId}/${todo.id}/${todo.title}/createTodo`,
-      {
-        mode: "no-cors",
-      }
+      `${api_domain}/api/todos/${todo.userId}/${todo.id}/${todo.title}/createTodo`
     );
   } else {
     throw Error(`Missing data,can't create todo: ${JSON.stringify(todo)}`);
@@ -41,9 +32,7 @@ export async function createTodo(todo: Todo) {
 }
 export async function deleteAllTodos(userId: string) {
   if (userId) {
-    const res = await fetch(`${api_domain}/api/todos/${userId}/deleteTodos`, {
-      mode: "no-cors",
-    });
+    const res = await fetch(`${api_domain}/api/todos/${userId}/deleteTodos`);
   } else {
     throw Error(`Missing data,can't delete all todos of userId: ${userId}`);
   }
