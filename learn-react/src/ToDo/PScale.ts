@@ -12,7 +12,7 @@ export async function toggleTodo(todo: Todo) {
       }
     );
   } else {
-    throw Error(`Missing data,can't toggle todo: ${todo}`);
+    throw Error(`Missing data,can't toggle todo: ${JSON.stringify(todo)}`);
   }
 }
 export async function deleteTodo(todo: Todo) {
@@ -24,7 +24,7 @@ export async function deleteTodo(todo: Todo) {
       }
     );
   } else {
-    throw Error(`Missing data,can't delete todo: ${todo}`);
+    throw Error(`Missing data,can't delete todo: ${JSON.stringify(todo)}`);
   }
 }
 export async function createTodo(todo: Todo) {
@@ -36,7 +36,7 @@ export async function createTodo(todo: Todo) {
       }
     );
   } else {
-    throw Error(`Missing data,can't create todo: ${todo}`);
+    throw Error(`Missing data,can't create todo: ${JSON.stringify(todo)}`);
   }
 }
 export async function deleteAllTodos(userId: string) {
