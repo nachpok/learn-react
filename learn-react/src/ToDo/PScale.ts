@@ -1,14 +1,16 @@
 import { toJS } from "mobx";
 import { Todo } from "./List";
+import { useAuth } from "../Context/AuthContext";
 export const api_domain =
   process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL ||
   process.env.NEXT_PUBLIC_TODO_API_URL;
+const { currentUser } = useAuth();
 export async function toggleTodo(todo: Todo) {
   console.log("PScale.toggleTodo.todo: ", toJS(todo));
 
   try {
     const res = await fetch(
-      `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`
+      `https://todo-api-juzg.vercel.app/api/todos/${currentUser.userId}/${todo.id}/toggle`
     );
     console.log("PScale.toggle.res: ", res);
   } catch (error) {
