@@ -1,5 +1,7 @@
 import { Todo } from "./List";
-export const api_domain = process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL;
+export const api_domain =
+  process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL ||
+  process.env.NEXT_PUBLIC_TODO_API_URL;
 // const domain = "  http://localhost:3000";
 export async function toggleTodo(todo: Todo) {
   if (todo.userId && todo.id) {
