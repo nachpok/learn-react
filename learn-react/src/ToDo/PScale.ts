@@ -3,11 +3,11 @@ export const api_domain =
   process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL ||
   process.env.NEXT_PUBLIC_TODO_API_URL;
 export async function toggleTodo(todo: Todo) {
-  const res = await fetch(
-    `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`
-  );
-  console.log("PScale.toggle.res: ", res);
   try {
+    const res = await fetch(
+      `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`
+    );
+    console.log("PScale.toggle.res: ", res);
   } catch (error) {
     throw Error(`${error}`);
   }
