@@ -7,14 +7,9 @@ export async function toggleTodo(todo: Todo) {
     const res = await fetch(
       `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`
     );
+    console.log("PScale.toggle.res: ", res);
   } catch (error) {
-    throw Error(
-      `Missing data,can't toggle todo: ${JSON.stringify(todo)} | ${error}`
-    );
-  }
-  if (todo.userId && todo.id) {
-  } else {
-    throw Error(`Missing data,can't toggle todo: ${JSON.stringify(todo)}`);
+    throw Error(`${error}`);
   }
 }
 export async function deleteTodo(todo: Todo) {
