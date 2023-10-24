@@ -1,9 +1,11 @@
 import { toJS } from "mobx";
 import { Todo } from "./List";
-export const api_domain =
-  process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL ||
-  process.env.NEXT_PUBLIC_TODO_API_URL;
+const local_domain = process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL;
+const prod_domain = process.env.NEXT_PUBLIC_TODO_API_URL;
+export const api_domain = local_domain ? local_domain : prod_domain;
+
 export async function toggleTodo(todo: Todo) {
+  console.log("api_domain: ", api_domain);
   validateTodoProperties("toggleTodo", todo);
   try {
     const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`;
