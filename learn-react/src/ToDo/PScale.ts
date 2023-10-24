@@ -7,6 +7,7 @@ export async function toggleTodo(todo: Todo) {
   validateTodoProperties("toggleTodo", todo);
   try {
     const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`;
+    console.log("PScale.toggle.url: ", url);
     const res = await fetch(url);
     console.log("PScale.toggle.res: ", res);
   } catch (error) {
