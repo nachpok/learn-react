@@ -11,19 +11,8 @@ import {
   sendPasswordResetEmail,
   GithubAuthProvider,
 } from "firebase/auth";
-import {
-  DataSnapshot,
-  Database,
-  getDatabase,
-  onValue,
-  ref,
-  remove,
-  set,
-  update,
-} from "firebase/database";
-import { get } from "http";
-import { useNavigate } from "react-router-dom";
-import { Item } from "./ToDoStore";
+import { Database } from "firebase/database";
+
 interface FirebaseConfig {
   apiKey: string;
   authDomain: string;
@@ -34,7 +23,6 @@ interface FirebaseConfig {
   measurementId: string;
 }
 
-//TODO deal with path and database, is path! ok??
 export default class Firebase {
   path!: string;
   firebaseConfig: FirebaseConfig;
@@ -60,10 +48,7 @@ export default class Firebase {
     this.googleProvider = new GoogleAuthProvider();
     this.githubProvider = new GithubAuthProvider();
   }
-  setUserPath(userId: string) {
-    this.path = `users/${userId}`;
-    this.database = getDatabase(this.app);
-  }
+
   getAuth() {
     return this.auth;
   }
@@ -72,33 +57,6 @@ export default class Firebase {
   }
   getGithubProvider() {
     return this.githubProvider;
-  }
-  getDbRef() {
-    return ref(this.database, this.path);
-  }
-  //get initial state and listen for changes
-  onDbValue(callback: (snapshot: DataSnapshot) => void) {
-    const ref = this.getDbRef();
-    onValue(ref, callback);
-  }
-
-  clearDb() {
-    const ref = this.getDbRef();
-    set(ref, null);
-  }
-
-  setDbItemValue(item: Item) {
-    const itemRef = ref(this.database, `${this.path}/${item.id}`);
-    set(itemRef, item);
-  }
-  //ToDo update change not item
-  updateItemValue(item: Item) {
-    const itemRef = ref(this.database, `${this.path}/${item.id}`);
-    update(itemRef, item);
-  }
-  removeItemValue(item: Item) {
-    const itemRef = ref(this.database, `${this.path}/${item.id}`);
-    remove(itemRef);
   }
 
   async signUpWithEmail(email: string, password: string): Promise<void> {

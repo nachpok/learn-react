@@ -43,9 +43,6 @@ export function AuthProvider({ firebase, children }: AuthProviderProps) {
     const unsubscribe = firebase.auth.onAuthStateChanged((user) => {
       setLoading(false);
       setCurrentUser(user);
-      if (user) {
-        firebase.setUserPath(user.uid);
-      }
     });
     return unsubscribe;
   }, []);

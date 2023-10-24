@@ -1,6 +1,4 @@
-import { toJS } from "mobx";
 import { Todo } from "./List";
-import { useAuth } from "../Context/AuthContext";
 const local_domain = process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL;
 const prod_domain = process.env.REACT_APP_API_URL;
 export const api_domain = local_domain ? local_domain : prod_domain;

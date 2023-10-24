@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// import List from "./ToDoReact/List";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import List from "./ToDo/List";
 import Signup from "./ToDo/Signup";

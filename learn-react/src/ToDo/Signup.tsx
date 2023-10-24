@@ -24,12 +24,6 @@ function Signup() {
       navigate("/");
     }
   }, [currentUser]);
-  // const emailRegex = new RegExp(
-  //   /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-  // );
-  // const passwordRegex = new RegExp(
-  //   "^(?=.*[A-Z])(?=.*[a-z])(?=.*[\\d\\W]).{8,16}$"
-  // );
 
   const onFinish = async () => {
     if (

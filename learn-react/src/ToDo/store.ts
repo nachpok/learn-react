@@ -1,10 +1,8 @@
-import { action, computed, makeAutoObservable, observable, toJS } from "mobx";
-import Firebase from "./Firebase";
-import { User } from "firebase/auth";
+import { action, computed, makeAutoObservable, observable } from "mobx";
+
 import { PSUser, Todo } from "./List";
 import { createTodo, deleteAllTodos, deleteTodo, toggleTodo } from "./PScale";
-// import { ref, onValue, set } from "firebase/database";
-// import { firebase } from "../App";
+
 export interface Item {
   id: number;
   userId: string;

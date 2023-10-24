@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import TodoStore, { Item } from "./ToDoStore";
 import { useAuth } from "../Context/AuthContext";
 import ListItem from "./ListItem";
 import { observer } from "mobx-react";
 import Footer from "./Footer";
 import "./list.css";
 import Header from "./Header";
-import Firebase from "./Firebase";
 import Store from "./store";
 import { api_domain } from "./PScale";
 export enum Mode {
