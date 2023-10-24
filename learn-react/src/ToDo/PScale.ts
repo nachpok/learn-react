@@ -6,6 +6,7 @@ export async function toggleTodo(todo: Todo) {
   validateTodoProperties("toggleTodo", todo);
   try {
     const url = `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`;
+    console.log("PScale fetch url: ", url);
     const res = await fetch(url);
     console.log("PScale.toggle.res: ", res);
   } catch (error) {
