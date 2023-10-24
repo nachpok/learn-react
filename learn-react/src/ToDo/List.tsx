@@ -41,9 +41,8 @@ export const List: React.FC<Props> = ({ firebase }) => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    console.log("VERCEL_URL: ", api_domain);
     fetch(
-      `https://todo-api-juzg.vercel.app/api/todos/${currentUser.uid}/user/${currentUser.email}/getUser`
+      `${api_domain}/api/todos/${currentUser.uid}/user/${currentUser.email}/getUser`
     )
       .then((response) => response.json())
       .then((result) => {

@@ -5,10 +5,6 @@ const prod_domain = process.env.REACT_APP_API_URL;
 export const api_domain = local_domain ? local_domain : prod_domain;
 
 export async function toggleTodo(todo: Todo) {
-  console.log("process.env.REACT_APP_API_URL: ", process.env.REACT_APP_API_URL);
-  console.log("local_domain: ", local_domain);
-  console.log("prod_domain: ", prod_domain);
-  console.log("api_domain: ", api_domain);
   validateTodoProperties("toggleTodo", todo);
   try {
     const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`;
