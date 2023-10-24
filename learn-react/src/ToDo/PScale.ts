@@ -5,45 +5,43 @@ export const api_domain =
   process.env.NEXT_PUBLIC_TODO_API_URL;
 export async function toggleTodo(todo: Todo) {
   validateTodoProperties("toggleTodo", todo);
-  console.log("PScale.toggle.todo: ", toJS(todo));
   try {
-    console.log("PScale.todo.usersId: ", todo.userId);
-    const url = `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`;
-    console.log("PScale fetch url: ", url);
+    const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`;
     const res = await fetch(url);
-    console.log("PScale.toggle.res: ", res);
+    // console.log("PScale.toggle.res: ", res);
   } catch (error) {
-    throw Error(`${error}`);
+    throw Error(`PScale.toggle.error: ${error}`);
   }
 }
 export async function deleteTodo(todo: Todo) {
-  if (todo.userId && todo.id) {
-    const res = await fetch(
-      `${api_domain}/api/todos/${todo.userId}/${todo.id}/deleteTodo`
-    );
-  } else {
-    throw Error(`Missing data,can't delete todo: ${JSON.stringify(todo)}`);
+  validateTodoProperties("deleteTodo", todo);
+
+  try {
+    const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/deleteTodo`;
+    const res = await fetch(url);
+    // console.log("PScale.deleteTodo.res: ", res);
+  } catch (error) {
+    throw Error(`PScale.deleteTodo.error: ${error}`);
   }
 }
 export async function createTodo(todo: Todo) {
-  console.log("PScale.todo.usersId: ", todo.userId);
-  const url = `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`;
+  validateTodoProperties("createTodo", todo);
+
   try {
-    const res = await fetch(
-      `${api_domain}/api/todos/${todo.userId}/${todo.id}/${todo.title}/createTodo`
-    );
+    const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/${todo.title}/createTodo`;
+    const res = await fetch(url);
+    // console.log("PScale.createTodo.res: ", res);
   } catch (error) {
-    throw Error(`Missing data,can't create todo. error: ${error}`);
-  }
-  if (todo.userId && todo.id && todo.title) {
-  } else {
+    throw Error(`PScale.createTodo.error: ${error}`);
   }
 }
 export async function deleteAllTodos(userId: string) {
-  if (userId) {
-    const res = await fetch(`${api_domain}/api/todos/${userId}/deleteTodos`);
-  } else {
-    throw Error(`Missing data,can't delete all todos of userId: ${userId}`);
+  try {
+    const url = `${api_domain}/api/todos/${userId}/deleteTodos`;
+    const res = await fetch(url);
+    // console.log("PScale.deleteAllTodos.res: ", res);
+  } catch (error) {
+    throw Error(`PScale.deleteAllTodos.error: ${error}`);
   }
 }
 
