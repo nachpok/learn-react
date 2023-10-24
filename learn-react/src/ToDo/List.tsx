@@ -38,9 +38,7 @@ export const List: React.FC<Props> = () => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    console.log("List.currentUser: ", currentUser);
     const url = `${api_domain}/api/route`;
-    console.log("List.url: ", url);
     fetch(url, {
       method: "GET",
       headers: {
@@ -49,13 +47,12 @@ export const List: React.FC<Props> = () => {
     })
       .then((response) => response.json())
       .then((result) => {
-        console.log("List.fetch.result: ", result);
         const storeInstance = new Store(result);
         setStore(storeInstance);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        console.log("List.Error.Response:", error.response);
+        console.log("List.Error.Response:", error);
       });
   }, []);
 
