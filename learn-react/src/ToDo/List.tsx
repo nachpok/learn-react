@@ -55,6 +55,7 @@ export const List: React.FC<Props> = () => {
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
+        console.log("List.Error.Response:", error.response);
       });
   }, []);
 
