@@ -6,12 +6,10 @@ export const api_domain =
   process.env.NEXT_PUBLIC_TODO_API_URL;
 const { currentUser } = useAuth();
 export async function toggleTodo(todo: Todo) {
-  console.log("PScale.toggleTodo.todo: ", toJS(todo));
-
+  validateTodoProperties("toggleTodo", todo);
   try {
-    const res = await fetch(
-      `https://todo-api-juzg.vercel.app/api/todos/${currentUser.userId}/${todo.id}/toggle`
-    );
+    const url = `https://todo-api-juzg.vercel.app/api/todos/${todo.userId}/${todo.id}/toggle`;
+    const res = await fetch(url);
     console.log("PScale.toggle.res: ", res);
   } catch (error) {
     throw Error(`${error}`);
@@ -40,5 +38,14 @@ export async function deleteAllTodos(userId: string) {
     const res = await fetch(`${api_domain}/api/todos/${userId}/deleteTodos`);
   } else {
     throw Error(`Missing data,can't delete all todos of userId: ${userId}`);
+  }
+}
+
+function validateTodoProperties(method: string, todo: Partial<Todo>): void {
+  const keys = Object.keys(todo) as Array<keyof Todo>;
+  for (const key of keys) {
+    if (todo[key] === undefined) {
+      throw new Error(`PScale.${method} - Property "${key}" is undefined.`);
+    }
   }
 }
