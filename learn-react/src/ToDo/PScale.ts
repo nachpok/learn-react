@@ -1,7 +1,7 @@
 import { toJS } from "mobx";
 import { Todo } from "./List";
 const local_domain = process.env.REACT_APP_NEXT_PUBLIC_TODO_API_URL;
-const prod_domain = process.env.NEXT_PUBLIC_TODO_API_URL;
+const prod_domain = process.env.REACT_APP_API_URL;
 export const api_domain = local_domain ? local_domain : prod_domain;
 
 export async function toggleTodo(todo: Todo) {
