@@ -5,7 +5,6 @@ import { PSUser, Todo } from "./List";
 import { createTodo, deleteAllTodos, deleteTodo, toggleTodo } from "./PScale";
 // import { ref, onValue, set } from "firebase/database";
 // import { firebase } from "../App";
-
 export interface Item {
   id: number;
   userId: string;
@@ -33,7 +32,7 @@ export class Store {
     this.list = todos;
   }
   @action
-  addTodo = (title: string, userId: string) => {
+  addTodo = (title: string, userId: string, accessToken: string) => {
     console.log("User ID: ", userId);
     const todo = {
       id: Date.now().toString(),
@@ -44,30 +43,30 @@ export class Store {
       updated_at: Date.now().toString(),
     };
     this.list.push(todo);
-    createTodo(todo);
+    createTodo(todo, accessToken);
   };
 
   @action
-  removeTodo = (todo: Todo) => {
+  removeTodo = (todo: Todo, accessToken: string) => {
     const index = this.list.indexOf(todo);
     if (index !== -1) {
       this.list.splice(index, 1);
     }
-    deleteTodo(todo);
+    deleteTodo(todo, accessToken);
   };
 
   @action
-  removeList = () => {
+  removeList = (accessToken: string) => {
     this.list = [];
-    deleteAllTodos(this.userId);
+    deleteAllTodos(accessToken);
   };
 
   @action
-  toggleTodo = (todoId: string) => {
+  toggleTodo = (todoId: string, accessToken: string) => {
     const todo = this.list.find((todo) => todo.id === todoId);
     if (todo) {
       todo.is_complete = !todo.is_complete;
-      toggleTodo(todo);
+      toggleTodo(todo, accessToken);
     }
   };
 

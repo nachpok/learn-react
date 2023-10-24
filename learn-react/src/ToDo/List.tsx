@@ -41,9 +41,18 @@ export const List: React.FC<Props> = ({ firebase }) => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    fetch(
-      `${api_domain}/api/todos/${currentUser.uid}/user/${currentUser.email}/getUser`
-    )
+    console.log("currentUser: ", currentUser);
+    const id = "123456";
+    const title = "nachliel";
+    // const url = `${api_domain}/api/route?id=${id}&title=${title}`;
+    const url = `${api_domain}/api/route`;
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${currentUser.accessToken}`,
+      },
+    })
       .then((response) => response.json())
       .then((result) => {
         const storeInstance = new Store(result);
@@ -58,15 +67,15 @@ export const List: React.FC<Props> = ({ firebase }) => {
     return <></>;
   }
 
-  const handleToggle = (itemId: string) => {
-    store.toggleTodo(itemId);
+  const handleToggle = (todoId: string) => {
+    store.toggleTodo(todoId, currentUser.accessToken);
   };
-  const handleRemove = (item: Todo) => {
-    store.removeTodo(item);
+  const handleRemove = (todo: Todo) => {
+    store.removeTodo(todo, currentUser.accessToken);
   };
 
   const handleClear = () => {
-    store.removeList();
+    store.removeList(currentUser.accessToken);
   };
   const filterMode = (item: Todo) => {
     return (
@@ -90,7 +99,7 @@ export const List: React.FC<Props> = ({ firebase }) => {
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter") {
-      store.addTodo(input, currentUser.uid);
+      store.addTodo(input, currentUser.uid, currentUser.accessToken);
       setInput("");
     }
   };
