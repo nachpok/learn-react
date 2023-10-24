@@ -5,6 +5,8 @@ const prod_domain = process.env.NEXT_PUBLIC_TODO_API_URL;
 export const api_domain = local_domain ? local_domain : prod_domain;
 
 export async function toggleTodo(todo: Todo) {
+  console.log("local_domain: ", local_domain);
+  console.log("prod_domain: ", prod_domain);
   console.log("api_domain: ", api_domain);
   validateTodoProperties("toggleTodo", todo);
   try {
