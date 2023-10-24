@@ -30,7 +30,7 @@ const App: React.FC = () => {
           <Route path="login" element={<Login />} />
           <Route path="reset-password" element={<ResetPassword />} />
           <Route element={<PrivateRoutes />}>
-            <Route path="/" element={<List firebase={firebase} />} />
+            <Route path="/" element={<List />} />
           </Route>
           <Route path="*" element={<h1>Page not found</h1>} />
         </Routes>

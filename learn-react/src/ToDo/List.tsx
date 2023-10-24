@@ -14,9 +14,7 @@ export enum Mode {
   active = "active",
   completed = "completed",
 }
-interface Props {
-  firebase: Firebase;
-}
+interface Props {}
 export interface PSUser {
   id: string;
   name: string;
@@ -33,18 +31,14 @@ export interface Todo {
   created_at: string;
   updated_at: string;
 }
-export const List: React.FC<Props> = ({ firebase }) => {
+export const List: React.FC<Props> = () => {
   const [mode, setMode] = useState<Mode>(Mode.all);
-  // const [store, setStore] = useState<TodoStore | null>(null);
   const [store, setStore] = useState<Store | null>(null);
   const [input, setInput] = useState<string>("");
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    console.log("currentUser: ", currentUser);
-    const id = "123456";
-    const title = "nachliel";
-    // const url = `${api_domain}/api/route?id=${id}&title=${title}`;
+    console.log("List.currentUser: ", currentUser);
     const url = `${api_domain}/api/route`;
 
     fetch(url, {
