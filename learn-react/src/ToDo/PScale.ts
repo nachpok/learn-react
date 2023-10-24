@@ -8,7 +8,7 @@ export async function toggleTodo(todo: Todo) {
   try {
     const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/toggle`;
     const res = await fetch(url);
-    // console.log("PScale.toggle.res: ", res);
+    console.log("PScale.toggle.res: ", res);
   } catch (error) {
     throw Error(`PScale.toggle.error: ${error}`);
   }
@@ -19,7 +19,7 @@ export async function deleteTodo(todo: Todo) {
   try {
     const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/deleteTodo`;
     const res = await fetch(url);
-    // console.log("PScale.deleteTodo.res: ", res);
+    console.log("PScale.deleteTodo.res: ", res);
   } catch (error) {
     throw Error(`PScale.deleteTodo.error: ${error}`);
   }
@@ -30,7 +30,7 @@ export async function createTodo(todo: Todo) {
   try {
     const url = `${api_domain}/api/todos/${todo.userId}/${todo.id}/${todo.title}/createTodo`;
     const res = await fetch(url);
-    // console.log("PScale.createTodo.res: ", res);
+    console.log("PScale.createTodo.res: ", res);
   } catch (error) {
     throw Error(`PScale.createTodo.error: ${error}`);
   }
@@ -39,7 +39,7 @@ export async function deleteAllTodos(userId: string) {
   try {
     const url = `${api_domain}/api/todos/${userId}/deleteTodos`;
     const res = await fetch(url);
-    // console.log("PScale.deleteAllTodos.res: ", res);
+    console.log("PScale.deleteAllTodos.res: ", res);
   } catch (error) {
     throw Error(`PScale.deleteAllTodos.error: ${error}`);
   }
