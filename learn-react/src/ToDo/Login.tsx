@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Button, Card, Form, Input, InputRef } from "antd";
 import { useAuth } from "../Context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
 enum Error {
   none = "",
@@ -14,12 +14,14 @@ export default function Login() {
   const { currentUser, login, googleLogin, githubLogin } = useAuth();
   const [error, setError] = useState<Error>(Error.none);
   const [loading, setLoading] = useState<boolean>(false);
+  const { appId } = useParams(); // Read the appId parameter from the route
   const navigate = useNavigate();
   useEffect(() => {
     if (currentUser != null) {
-      navigate("/");
+      navigate(`/${appId}`);
     }
-  }, [currentUser]);
+  }, [currentUser, appId]);
+
   const onFinish = async () => {
     try {
       setError(Error.none);
@@ -28,7 +30,7 @@ export default function Login() {
         emailRef.current?.input?.value,
         passwordRef.current?.input?.value
       );
-      navigate("/");
+      navigate(`/${appId}`);
     } catch (e) {
       if (e instanceof FirebaseError) {
         if (

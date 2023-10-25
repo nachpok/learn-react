@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import List from "./ToDo/List";
 import Signup from "./ToDo/Signup";
 import { AuthProvider } from "./Context/AuthContext";
@@ -7,13 +7,14 @@ import Login from "./ToDo/Login";
 import { PrivateRoutes } from "./ToDo/PrivateRoutes";
 import ResetPassword from "./ToDo/ResetPassword";
 import Firebase from "./ToDo/Firebase";
+import PdfEditor from "./PDF/PdfEditor";
+import HomePage from "./HomePage";
 
 const App: React.FC = () => {
   const [firebase, setFirebase] = useState<Firebase | null>(null);
 
   useEffect(() => {
     const fbInstance = new Firebase();
-
     setFirebase(fbInstance);
   }, []);
 
@@ -28,9 +29,11 @@ const App: React.FC = () => {
           <Route path="signup" element={<Signup />} />
           <Route path="login" element={<Login />} />
           <Route path="reset-password" element={<ResetPassword />} />
-          <Route element={<PrivateRoutes />}>
-            <Route path="/" element={<List />} />
+          <Route path="todo" element={<PrivateRoutes />}>
+            <Route index element={<List />} />
           </Route>
+          <Route path="pdf-editor" element={<PdfEditor />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="*" element={<h1>Page not found</h1>} />
         </Routes>
       </AuthProvider>
