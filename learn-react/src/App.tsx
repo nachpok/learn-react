@@ -28,13 +28,14 @@ const App: React.FC = () => {
         <Routes>
           <Route path="signup" element={<Signup />} />
           <Route path="login" element={<Login />} />
+
           <Route path="reset-password" element={<ResetPassword />} />
-          <Route path="todo" element={<PrivateRoutes />}>
-            <Route index element={<List />} />
+          <Route element={<PrivateRoutes />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="todo" element={<List />} />
+            <Route path="pdf-editor" element={<PdfEditor />} />
           </Route>
-          <Route path="pdf-editor" element={<PdfEditor />} />
-          <Route path="/" element={<HomePage />} />
-          <Route path="*" element={<h1>Page not found</h1>} />
+          <Route path="*" element={<HomePage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

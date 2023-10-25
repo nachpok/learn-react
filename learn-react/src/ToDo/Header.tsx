@@ -4,20 +4,17 @@ import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 
 export default function Header() {
-  const { currentUser, logout } = useAuth();
-
-  const handleLogOut = async () => {
-    try {
-      await logout();
-    } catch (e) {}
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const homePage = () => {
+    navigate(`/`);
   };
   return (
     <>
       {currentUser ? (
         <div>
-          <strong>Email:</strong> {currentUser.email}{" "}
-          <Button type="primary" onClick={handleLogOut}>
-            Log out
+          <Button type="primary" onClick={homePage}>
+            Home Page
           </Button>
         </div>
       ) : (
