@@ -28,20 +28,22 @@ const options = {
 const resizeObserverOptions = {};
 
 const maxWidth = 1920;
-
-type PDFFile = File;
-
+interface Cords {
+  x: number;
+  y: number;
+}
 export default function Sample() {
-  const [file, setFile] = useState<PDFFile>();
+  const [file, setFile] = useState<File>();
   const [pdfString, setPdfString] = useState<string>();
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState<ArrayBuffer | null>(
     null
   );
-  const [currentPage, setCurrentPage] = useState<number>();
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [numPages, setNumPages] = useState<number>();
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
-
+  const [cords, setCords] = useState<Cords>();
+  const [selectedCords, setSelectedCords] = useState<Cords>();
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
 
@@ -80,16 +82,19 @@ export default function Sample() {
   }
 
   const addText = async () => {
-    if (pdfArrayBuffer) {
+    setSelectedCords(cords);
+    console.log(cords);
+
+    if (pdfArrayBuffer && cords) {
       const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
       const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
       const pages = pdfDoc.getPages();
-      const firstPage = pages[0];
+      const page = pages[currentPage];
       const fontSize = 30;
-      const { height } = firstPage.getSize();
-      firstPage.drawText("Some Text!", {
-        x: 50,
-        y: height - 4 * fontSize,
+      const { height } = page.getSize();
+      page.drawText("Some Text!", {
+        x: cords.x - 40,
+        y: height - cords.y,
         size: fontSize,
         font: timesRomanFont,
         color: rgb(0, 0.53, 0.71),
@@ -121,9 +126,31 @@ export default function Sample() {
   }
 
   const nextPage = () => {
-    if (currentPage && numPages && currentPage < numPages) {
+    if (numPages && currentPage < numPages - 1) {
       setCurrentPage(currentPage + 1);
     }
+  };
+  const prevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+      console.log("prevPage.currentPage: ", currentPage);
+    }
+  };
+  const handleMouseMove = (e: {
+    currentTarget: { getBoundingClientRect: () => any };
+    clientX: number;
+    clientY: number;
+  }) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setCords({ x: x, y: y });
+    console.log(cords);
+  };
+
+  const onLocationClick = () => {
+    console.log(cords);
   };
   return (
     <div className="PdfEditor">
@@ -144,22 +171,20 @@ export default function Sample() {
               file={file}
               onLoadSuccess={onDocumentLoadSuccess}
               options={options}
+              onMouseMove={handleMouseMove}
+              onClick={addText}
             >
-              {Array.from(new Array(numPages), (el, index) => (
-                <Page
-                  key={`page_${index + 1}`}
-                  pageNumber={index + 1}
-                  width={
-                    containerWidth
-                      ? Math.min(containerWidth, maxWidth)
-                      : maxWidth
-                  }
-                />
-              ))}
+              <Page
+                key={`page_${currentPage + 1}`}
+                pageNumber={currentPage + 1}
+                width={
+                  containerWidth ? Math.min(containerWidth, maxWidth) : maxWidth
+                }
+              />
             </Document>
-            <Button>Prevues</Button>
-            {currentPage ? `${currentPage + 1}` : ""}
-            <Button>Next</Button>
+            <Button onClick={prevPage}>Prevues</Button>
+            {currentPage + 1}/{numPages}
+            <Button onClick={nextPage}>Next</Button>
           </div>
         ) : (
           <></>
