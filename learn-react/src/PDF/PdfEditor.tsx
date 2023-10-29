@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { Button, Input } from "antd";
 
+//--
+import { Document, Page } from "react-pdf";
+
+import { pdfjs } from "react-pdf";
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.js",
+  import.meta.url
+).toString();
+//--
 function PdfEditor() {
   const [pdfString, setPdfString] = useState<string>();
-
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState<ArrayBuffer | null>(
     null
   );
@@ -90,9 +99,9 @@ function PdfEditor() {
   };
 
   const iframeStyle = {
-    width: "100vw",
-    height: "90vh",
-    border: "1px solid #ccc",
+    width: "595px",
+    height: "842px",
+    border: "3px solid #ccc",
   };
 
   return (
@@ -102,9 +111,10 @@ function PdfEditor() {
       <Button onClick={addPage}>Add Page to end</Button>
       <Button onClick={removePage}>Remove page from end</Button>
       <Button onClick={downloadPDF}>Download PDF</Button>
+
       {pdfString ? (
         <>
-          <iframe style={iframeStyle} src={pdfString}></iframe>
+          <iframe id="iframe" style={iframeStyle} src={pdfString}></iframe>
         </>
       ) : (
         <>
