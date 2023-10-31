@@ -14,6 +14,7 @@ import {
   TypedArray,
   DocumentInitParameters,
 } from "pdfjs-dist/types/src/display/api";
+import TextInput from "./TextInput";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -43,14 +44,13 @@ export default function Sample() {
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
   const [cords, setCords] = useState<Cords>();
-  const [selectedCords, setSelectedCords] = useState<Cords>();
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
 
     if (entry) {
       setContainerWidth(700);
       //TODO set dynamic width by vw
-        // setContainerWidth(entry.contentRect.width);
+      // setContainerWidth(entry.contentRect.width);
     }
   }, []);
 
@@ -81,8 +81,8 @@ export default function Sample() {
     setNumPages(nextNumPages);
   }
 
-  const addText = async () => {
-   console.log(cords)
+  const addO = async () => {
+    console.log(cords);
 
     if (pdfArrayBuffer && cords && containerWidth) {
       const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
@@ -92,12 +92,13 @@ export default function Sample() {
       const fontSize = 30;
       const { height } = page.getSize();
       const A = 100 / 113.99999999999999;
-const B = 16.625030517578125 * A;
-const C = 100 / (-117);
-const D = -918.1110992431641 * C;
+      const B = 16.625030517578125 * A;
+      const C = 100 / -117;
+      const D = -918.1110992431641 * C;
       page.drawText("O", {
         x: A * cords.x + B,
         y: C * cords.y + D,
+
         size: fontSize,
         font: timesRomanFont,
         color: rgb(0, 0.53, 0.71),
@@ -136,9 +137,9 @@ const D = -918.1110992431641 * C;
   const prevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
-      console.log("prevPage.currentPage: ", currentPage);
     }
   };
+
   const handleMouseMove = (e: {
     currentTarget: { getBoundingClientRect: () => any };
     clientX: number;
@@ -154,10 +155,34 @@ const D = -918.1110992431641 * C;
   const onLocationClick = () => {
     console.log(cords);
   };
+
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textInputPosition, setTextInputPosition] = useState({ x: 0, y: 0 });
+
+  const addText = () => {
+    if (cords) {
+      setShowTextInput(true);
+      setTextInputPosition(cords);
+    }
+  };
+
+  const onTextInputDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setTextInputPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const onTextInputDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setShowTextInput(false);
+    if (cords) {
+      setTextInputPosition(cords);
+    }
+  };
+
   return (
     <div className="PdfEditor">
       <header>
-        <h1>react-pdf sample page</h1>
+        <h1 style={{ textAlign: "center" }}>Replace Adobe</h1>
       </header>
 
       <div className="PdfEditor__container">
@@ -173,8 +198,7 @@ const D = -918.1110992431641 * C;
               file={file}
               onLoadSuccess={onDocumentLoadSuccess}
               options={options}
-              onMouseMove={handleMouseMove}
-              onClick={addText}
+              onClick={addO}
             >
               <Page
                 key={`page_${currentPage + 1}`}
@@ -182,8 +206,21 @@ const D = -918.1110992431641 * C;
                 width={
                   containerWidth ? Math.min(containerWidth, maxWidth) : maxWidth
                 }
+                onMouseMove={handleMouseMove}
               />
             </Document>
+            {showTextInput && (
+              <TextInput
+                style={{
+                  position: "absolute",
+                  left: `${textInputPosition.x}px`,
+                  top: `${textInputPosition.y}px`,
+                }}
+                draggable
+                onDrag={onTextInputDrag}
+                onDrop={onTextInputDrop}
+              />
+            )}
             <Button onClick={prevPage}>Prevues</Button>
             {currentPage + 1}/{numPages}
             <Button onClick={nextPage}>Next</Button>

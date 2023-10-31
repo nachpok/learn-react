@@ -3,5 +3,10 @@
         "antd",
         "cmaps",
         "wojtekmaj"
-    ]
+    ],
+    "editor.defaultFormatter": "vscode.extension-editing",
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "editor.formatOnSave": true
 }
