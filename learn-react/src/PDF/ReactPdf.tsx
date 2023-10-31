@@ -48,9 +48,9 @@ export default function Sample() {
     const [entry] = entries;
 
     if (entry) {
-      setContainerWidth(800);
+      setContainerWidth(700);
       //TODO set dynamic width by vw
-      //   setContainerWidth(entry.contentRect.width);
+        // setContainerWidth(entry.contentRect.width);
     }
   }, []);
 
@@ -82,19 +82,22 @@ export default function Sample() {
   }
 
   const addText = async () => {
-    setSelectedCords(cords);
-    console.log(cords);
+   console.log(cords)
 
-    if (pdfArrayBuffer && cords) {
+    if (pdfArrayBuffer && cords && containerWidth) {
       const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
       const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
       const pages = pdfDoc.getPages();
       const page = pages[currentPage];
       const fontSize = 30;
       const { height } = page.getSize();
-      page.drawText("Some Text!", {
-        x: cords.x - 40,
-        y: height - cords.y,
+      const A = 100 / 113.99999999999999;
+const B = 16.625030517578125 * A;
+const C = 100 / (-117);
+const D = -918.1110992431641 * C;
+      page.drawText("O", {
+        x: A * cords.x + B,
+        y: C * cords.y + D,
         size: fontSize,
         font: timesRomanFont,
         color: rgb(0, 0.53, 0.71),
@@ -146,7 +149,6 @@ export default function Sample() {
     const y = e.clientY - rect.top;
 
     setCords({ x: x, y: y });
-    console.log(cords);
   };
 
   const onLocationClick = () => {
