@@ -104,9 +104,6 @@ export default function ReactPdf() {
       const page = pages[currentPage];
       const fontSize = 20;
       const pageHeight = page.getHeight();
-      const pageWidth = page.getWidth();
-      console.log(`PDF-Lib Height: ${pageHeight}, width :${pageWidth}`);
-
       const pageSizeRatio = clientHeight / pageHeight;
       page.drawText("Text", {
         x: cords.x / pageSizeRatio - 2,
@@ -125,16 +122,43 @@ export default function ReactPdf() {
     }
   };
 
-  const downloadPDF = () => {
-    const a = document.createElement("a");
-    if (a && pdfString) {
-      a.href = pdfString;
-      //Todo set name
-      a.download = "uploaded.pdf";
-      a.click();
+  const downloadPDF = async () => {
+    if (pdfArrayBuffer && containerWidth) {
+      const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
+      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+      const pages = pdfDoc.getPages();
+      const page = pages[currentPage];
+      const fontSize = 20;
+      const pageHeight = page.getHeight();
+      const pageSizeRatio = clientHeight / pageHeight;
+      console.log("Drop text: ", dropTexts);
+      dropTexts.forEach((dropText) => {
+        console.log("ADDING TEXT!!");
+        page.drawText(dropText.text, {
+          x: dropText.x,
+          y: dropText.y,
+          size: fontSize,
+          font: timesRomanFont,
+          color: rgb(0, 0.53, 0.71),
+        });
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      setPdfArrayBuffer(pdfBytes);
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const pdfFile = new File([blob], "sample", { type: "application/pdf" });
+      setFile(pdfFile);
+      const dataUrl = URL.createObjectURL(blob);
+      setPdfString(dataUrl);
+
+      const a = document.createElement("a");
+      if (a && pdfString) {
+        a.href = pdfString;
+        a.download = "uploaded.pdf";
+        a.click();
+      }
     }
   };
-
   const nextPage = () => {
     if (numPages && currentPage < numPages - 1) {
       setCurrentPage(currentPage + 1);
