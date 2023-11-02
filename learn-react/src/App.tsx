@@ -10,7 +10,7 @@ import Firebase from "./ToDo/Firebase";
 import PdfEditor from "./PDF/PdfEditor";
 import HomePage from "./HomePage";
 // import ReactPdf from "./PDF/ReactPdf";
-import Sample from "./PDF/ReactPdf";
+import ReactPdf from "./PDF/ReactPdf";
 
 const App: React.FC = () => {
   const [firebase, setFirebase] = useState<Firebase | null>(null);
@@ -35,7 +35,7 @@ const App: React.FC = () => {
           <Route element={<PrivateRoutes />}>
             <Route path="/" element={<HomePage />} />
             <Route path="todo" element={<List />} />
-            <Route path="pdf-editor" element={<Sample />} />
+            <Route path="pdf-editor" element={<ReactPdf />} />
           </Route>
           <Route path="*" element={<HomePage />} />
         </Routes>

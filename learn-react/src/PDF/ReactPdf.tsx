@@ -6,7 +6,6 @@ import "react-pdf/dist/esm/Page/TextLayer.css";
 import { PDFDocument, StandardFonts, rgb, setLineHeight } from "pdf-lib";
 import { Button, Input } from "antd";
 import "./Sample.css";
-// import pdfjs from 'pdfjs-dist/build/pdf';
 import "pdfjs-dist/build/pdf.worker.entry";
 
 import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -15,6 +14,8 @@ import {
   DocumentInitParameters,
 } from "pdfjs-dist/types/src/display/api";
 import TextInput from "./TextInput";
+import DropButton from "./DropComponentButton";
+import DropText from "./DropText";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -33,7 +34,17 @@ interface Cords {
   x: number;
   y: number;
 }
-export default function Sample() {
+enum ElementType {
+  text = "text",
+  sign = "sign",
+}
+interface TextElement {
+  text: string;
+  id: number;
+  x: number;
+  y: number;
+}
+export default function ReactPdf() {
   const [file, setFile] = useState<File>();
   const [pdfString, setPdfString] = useState<string>();
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState<ArrayBuffer | null>(
@@ -44,8 +55,10 @@ export default function Sample() {
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
   const [cords, setCords] = useState<Cords>();
-  const [absCords, setAbsCords] = useState<Cords>();
-  const [height, setHeight] = useState<number>(0);
+  const [elementType, setElementType] = useState<ElementType | null>();
+  const [clientHeight, setClientHeight] = useState<number>(0);
+  const [dropTexts, setDropTexts] = useState<TextElement[]>([]);
+  const [pageSizeRation, setPageSizeRatio] = useState<number>(0);
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
 
@@ -58,7 +71,7 @@ export default function Sample() {
 
   useResizeObserver(containerRef, resizeObserverOptions, onResize);
 
-  async function onFileChange(
+  async function onFileUpload(
     event: React.ChangeEvent<HTMLInputElement>
   ): Promise<void> {
     const { files } = event.target;
@@ -66,18 +79,11 @@ export default function Sample() {
     if (files && files[0]) {
       console.log("files.len: ", files.length);
       setFile(files[0]);
-      fileToBase64(files[0]).then((base64) => {
-        console.log(base64); // This is your base64 string
-      });
       const buffer = await files[0].arrayBuffer();
-
       setPdfArrayBuffer(buffer);
       const blob = new Blob([buffer], { type: "application/pdf" });
       const dataUrl = URL.createObjectURL(blob);
       setPdfString(dataUrl);
-      const len = await getPDFLength(dataUrl);
-      setNumPages(len);
-      console.log("number of pages: ", len);
     }
   }
 
@@ -89,7 +95,7 @@ export default function Sample() {
 
   const addO = async () => {
     console.log(cords);
-    console.log("height: ", height);
+    console.log("height: ", clientHeight);
 
     if (pdfArrayBuffer && cords && containerWidth) {
       const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
@@ -97,17 +103,14 @@ export default function Sample() {
       const pages = pdfDoc.getPages();
       const page = pages[currentPage];
       const fontSize = 20;
-      // const { height } = page.getSize();
-      const A = 100 / 113.99999999999999;
-      const B = 16.625030517578125 * A;
-      const C = 100 / -117;
-      const D = -918.1110992431641 * C;
-      page.drawText("•", {
-        // x: A * cords.x + B - 10,
-        // y: C * cords.y + D - 10,
+      const pageHeight = page.getHeight();
+      const pageWidth = page.getWidth();
+      console.log(`PDF-Lib Height: ${pageHeight}, width :${pageWidth}`);
 
-        x: 100,
-        y: 100,
+      const pageSizeRatio = clientHeight / pageHeight;
+      page.drawText("Text", {
+        x: cords.x / pageSizeRatio - 2,
+        y: pageHeight - cords.y / pageSizeRatio - 3,
         size: fontSize,
         font: timesRomanFont,
         color: rgb(0, 0.53, 0.71),
@@ -115,28 +118,22 @@ export default function Sample() {
       const pdfBytes = await pdfDoc.save();
       setPdfArrayBuffer(pdfBytes);
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      //TODO get file name (current placeholder "sample")
       const pdfFile = new File([blob], "sample", { type: "application/pdf" });
       setFile(pdfFile);
       const dataUrl = URL.createObjectURL(blob);
       setPdfString(dataUrl);
     }
   };
+
   const downloadPDF = () => {
     const a = document.createElement("a");
     if (a && pdfString) {
       a.href = pdfString;
+      //Todo set name
       a.download = "uploaded.pdf";
       a.click();
     }
   };
-
-  async function getPDFLength(pdfUrl: string) {
-    const loadingTask = pdfjs.getDocument(pdfUrl);
-    const pdf = await loadingTask.promise;
-    const numPages = pdf.numPages;
-    return numPages;
-  }
 
   const nextPage = () => {
     if (numPages && currentPage < numPages - 1) {
@@ -150,43 +147,36 @@ export default function Sample() {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const height = e.currentTarget.clientHeight;
-    setAbsCords({ x: e.clientX, y: e.clientY });
-    setCords({ x: x, y: y });
-    setHeight(height);
-    console.log(cords);
+    // const rect = e.currentTarget.getBoundingClientRect();
+    // const x = e.clientX - rect.left;
+    // const y = e.clientY - rect.top;
+    // const height = e.currentTarget.clientHeight;
+    // setCords({ x: x, y: y });
+    // setClientHeight(height);
   };
 
-  const onLocationClick = () => {
-    console.log(cords);
-  };
-
-  const [showTextInput, setShowTextInput] = useState(false);
-  const [textInputPosition, setTextInputPosition] = useState({ x: 0, y: 0 });
-
-  const addText = () => {
-    if (absCords) {
-      setShowTextInput(true);
-      setTextInputPosition(absCords);
+  const handlePageTextClick = (e: React.MouseEvent) => {
+    if (elementType === "text") {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const heightAdjustment =
+        e.clientY - rect.top > 18 ? 18 : e.clientY - rect.top;
+      const newDropText = {
+        text: "Text Component",
+        id: dropTexts.length,
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top - heightAdjustment,
+      };
+      setDropTexts([...dropTexts, newDropText]);
     }
   };
 
-  const onTextInputDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setTextInputPosition({ x: e.clientX, y: e.clientY });
-  };
-
-  const onTextInputDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setShowTextInput(false);
-    if (absCords) {
-      setTextInputPosition(absCords);
-    }
-  };
-
+  //generate blanc white pdf for testing
+  async function getPDFLength(pdfUrl: string) {
+    const loadingTask = pdfjs.getDocument(pdfUrl);
+    const pdf = await loadingTask.promise;
+    const numPages = pdf.numPages;
+    return numPages;
+  }
   useEffect(() => {
     const blob = base64ToBlob(fileBase64);
     const dataUrl = URL.createObjectURL(blob);
@@ -200,6 +190,7 @@ export default function Sample() {
       setPdfArrayBuffer(buffer);
     });
   }, []);
+
   return (
     <div className="PdfEditor">
       <header>
@@ -209,17 +200,27 @@ export default function Sample() {
       <div className="PdfEditor__container">
         <div className="PdfEditor__container__load">
           <label htmlFor="file">Load from file:</label>{" "}
-          <input onChange={onFileChange} type="file" />
+          <input onChange={onFileUpload} type="file" />
         </div>
         {file ? (
           <div className="PdfEditor__container__document" ref={setContainerRef}>
-            <Button onClick={addText}>Add Text</Button>
-            <Button onClick={downloadPDF}>Download PDF</Button>
+            <div style={{ display: "flex" }}>
+              <DropButton
+                onClick={() => {
+                  elementType
+                    ? setElementType(null)
+                    : setElementType(ElementType.text);
+                }}
+              >
+                Text
+              </DropButton>
+              <Button onClick={downloadPDF}>Download PDF</Button>
+            </div>
             <Document
               file={file}
               onLoadSuccess={onDocumentLoadSuccess}
               options={options}
-              onClick={addO}
+              // onClick={addO}
             >
               <div>
                 <Page
@@ -231,19 +232,19 @@ export default function Sample() {
                       : maxWidth
                   }
                   onMouseMove={handleMouseMove}
-                ></Page>
-                {/* {showTextInput && (
-                  <TextInput
-                    style={{
-                      position: "absolute",
-                      left: `${textInputPosition.x}px`,
-                      top: `${textInputPosition.y}px`,
-                    }}
-                    draggable
-                    onDrag={onTextInputDrag}
-                    onDrop={onTextInputDrop}
-                  />
-                )} */}
+                  onClick={handlePageTextClick}
+                >
+                  {dropTexts.map((dropText) => (
+                    <DropText
+                      key={dropText.id}
+                      style={{
+                        position: "absolute",
+                        left: dropText.x,
+                        top: dropText.y,
+                      }}
+                    />
+                  ))}
+                </Page>
               </div>
             </Document>
             <Button onClick={prevPage}>Prevues</Button>
@@ -257,6 +258,7 @@ export default function Sample() {
     </div>
   );
 }
+
 const base64ToBlob = (base64: string) => {
   const prefix = "data:application/pdf;base64,";
   if (base64.startsWith(prefix)) {
