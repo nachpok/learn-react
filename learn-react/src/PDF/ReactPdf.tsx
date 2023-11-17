@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useResizeObserver } from "@wojtekmaj/react-hooks";
 import { pdfjs, Document, Page } from "react-pdf";
@@ -20,6 +20,7 @@ import {
 import DropButton from "./DropComponentButton";
 import DraggableText from "./DraggableText";
 import { PointerSensor } from "@dnd-kit/core";
+import { SmartPointerSensor } from "./SmartPointerSensor";
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
   import.meta.url
@@ -81,7 +82,7 @@ export default function ReactPdf() {
       // setContainerWidth(entry.contentRect.width);
     }
   }, []);
-  const sensors = useSensors(useSensor(MouseSensor));
+  const sensors = useSensors(useSensor(SmartPointerSensor));
   useResizeObserver(containerRef, resizeObserverOptions, onResize);
 
   async function onFileUpload(
@@ -177,10 +178,13 @@ export default function ReactPdf() {
   };
 
   //DnD
+  const positionsRef = useRef<Positions>({ "0": { x: 0, y: 0 } });
+
   const handleDragEnd = (event: DragEndEvent) => {
     console.log(event);
 
     const { active, over, delta } = event;
+    positionsRef.current[active.id] = { x: delta.x, y: delta.y };
     console.log(`active.id: ${active.id}, delta: `, delta);
     setPositions({ [active.id]: { x: delta.x, y: delta.y } });
     console.log("Pos: ", positions);
@@ -240,8 +244,8 @@ export default function ReactPdf() {
                 style={{
                   position: "relative",
                   zIndex: 9999,
-                  transform: positions["1"]
-                    ? `translate(${positions["1"].x}px, ${positions["1"].y}px)`
+                  transform: positionsRef.current["1"]
+                    ? `translate(${positionsRef.current["1"].x}px, ${positionsRef.current["1"].y}px)`
                     : undefined,
                 }}
               />

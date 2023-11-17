@@ -2,6 +2,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "antd";
 import { useState } from "react";
 import { Positions } from "./ReactPdf";
+import { MenuOutlined } from "@ant-design/icons";
 
 interface DraggableTextProps {
   id: string;
@@ -25,7 +26,16 @@ export default function DraggableText({ id, style }: DraggableTextProps) {
       {...listeners}
       {...attributes}
     >
-      <Input bordered style={{ width: "20%" }}></Input>
+      <span>
+        <Input
+          className="input-component"
+          bordered
+          style={{ width: "20%" }}
+        ></Input>
+      </span>
+      <Button {...listeners} {...attributes}>
+        <MenuOutlined />
+      </Button>
     </div>
   );
 }

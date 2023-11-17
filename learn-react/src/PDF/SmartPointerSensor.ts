@@ -6,7 +6,7 @@ export class SmartPointerSensor extends PointerSensor {
     {
       eventName: "onPointerDown" as any,
       handler: ({ nativeEvent: event }: PointerEvent) => {
-        // getElementTest(event.target as Element); //for identifying elements to restrict form DnD
+        getElementTest(event.target as Element); //for identifying elements to restrict form DnD
         if (
           !event.isPrimary ||
           event.button !== 0 ||
@@ -24,12 +24,10 @@ export class SmartPointerSensor extends PointerSensor {
 //Added path & svg for clearing dropdown
 function isInteractiveElement(element: Element | null) {
   const interactiveElementType = [
-   
     "svg",
   ];
   const interactiveClasses = [
-    "ant-picker",
-   
+   "input-component"
   ];
 
   if (
