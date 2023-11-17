@@ -7,9 +7,7 @@ import Login from "./ToDo/Login";
 import { PrivateRoutes } from "./ToDo/PrivateRoutes";
 import ResetPassword from "./ToDo/ResetPassword";
 import Firebase from "./ToDo/Firebase";
-import PdfEditor from "./PDF/PdfEditor";
 import HomePage from "./HomePage";
-// import ReactPdf from "./PDF/ReactPdf";
 import ReactPdf from "./PDF/ReactPdf";
 
 const App: React.FC = () => {

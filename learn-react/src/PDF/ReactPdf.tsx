@@ -1,22 +1,25 @@
+import React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useResizeObserver } from "@wojtekmaj/react-hooks";
 import { pdfjs, Document, Page } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import { PDFDocument, StandardFonts, rgb, setLineHeight } from "pdf-lib";
-import { Button, Input } from "antd";
-import "./Sample.css";
+import { Button } from "antd";
 import "pdfjs-dist/build/pdf.worker.entry";
-
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import {
-  TypedArray,
-  DocumentInitParameters,
-} from "pdfjs-dist/types/src/display/api";
-import TextInput from "./TextInput";
-import DropButton from "./DropComponentButton";
-import DropText from "./DropText";
+  DndContext,
+  DragEndEvent,
+  MouseSensor,
+  useDraggable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 
+import DropButton from "./DropComponentButton";
+import DraggableText from "./DraggableText";
+import { PointerSensor } from "@dnd-kit/core";
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
   import.meta.url
@@ -41,8 +44,18 @@ enum ElementType {
 interface TextElement {
   text: string;
   id: number;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+type Position = {
   x: number;
   y: number;
+};
+
+export interface Positions {
+  [key: string]: Position;
 }
 export default function ReactPdf() {
   const [file, setFile] = useState<File>();
@@ -54,11 +67,11 @@ export default function ReactPdf() {
   const [numPages, setNumPages] = useState<number>();
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
-  const [cords, setCords] = useState<Cords>();
   const [elementType, setElementType] = useState<ElementType | null>();
   const [clientHeight, setClientHeight] = useState<number>(0);
   const [dropTexts, setDropTexts] = useState<TextElement[]>([]);
-  const [pageSizeRation, setPageSizeRatio] = useState<number>(0);
+
+  const [positions, setPositions] = useState<Positions>({});
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
 
@@ -68,7 +81,7 @@ export default function ReactPdf() {
       // setContainerWidth(entry.contentRect.width);
     }
   }, []);
-
+  const sensors = useSensors(useSensor(MouseSensor));
   useResizeObserver(containerRef, resizeObserverOptions, onResize);
 
   async function onFileUpload(
@@ -93,52 +106,25 @@ export default function ReactPdf() {
     setNumPages(nextNumPages);
   }
 
-  const addO = async () => {
-    console.log(cords);
-    console.log("height: ", clientHeight);
-
-    if (pdfArrayBuffer && cords && containerWidth) {
-      const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
-      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-      const pages = pdfDoc.getPages();
-      const page = pages[currentPage];
-      const fontSize = 20;
-      const pageHeight = page.getHeight();
-      const pageSizeRatio = clientHeight / pageHeight;
-      page.drawText("Text", {
-        x: cords.x / pageSizeRatio - 2,
-        y: pageHeight - cords.y / pageSizeRatio - 3,
-        size: fontSize,
-        font: timesRomanFont,
-        color: rgb(0, 0.53, 0.71),
-      });
-      const pdfBytes = await pdfDoc.save();
-      setPdfArrayBuffer(pdfBytes);
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const pdfFile = new File([blob], "sample", { type: "application/pdf" });
-      setFile(pdfFile);
-      const dataUrl = URL.createObjectURL(blob);
-      setPdfString(dataUrl);
-    }
-  };
-
+  //Todo - download new version of pdf, currently I download the original source pdf and then render and present the new edited one
   const downloadPDF = async () => {
     if (pdfArrayBuffer && containerWidth) {
       const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
-      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const pages = pdfDoc.getPages();
       const page = pages[currentPage];
-      const fontSize = 20;
+      const fontSize = 14;
       const pageHeight = page.getHeight();
       const pageSizeRatio = clientHeight / pageHeight;
-      console.log("Drop text: ", dropTexts);
+      console.log(
+        `downloadPDF - clientHeight: ${clientHeight},  pageHeight: ${pageHeight}`
+      );
       dropTexts.forEach((dropText) => {
-        console.log("ADDING TEXT!!");
         page.drawText(dropText.text, {
-          x: dropText.x,
-          y: dropText.y,
+          x: dropText.position.x / pageSizeRatio - 2,
+          y: pageHeight - dropText.position.y / pageSizeRatio - 15,
           size: fontSize,
-          font: timesRomanFont,
+          font: font,
           color: rgb(0, 0.53, 0.71),
         });
       });
@@ -150,7 +136,6 @@ export default function ReactPdf() {
       setFile(pdfFile);
       const dataUrl = URL.createObjectURL(blob);
       setPdfString(dataUrl);
-
       const a = document.createElement("a");
       if (a && pdfString) {
         a.href = pdfString;
@@ -170,16 +155,9 @@ export default function ReactPdf() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    // const rect = e.currentTarget.getBoundingClientRect();
-    // const x = e.clientX - rect.left;
-    // const y = e.clientY - rect.top;
-    // const height = e.currentTarget.clientHeight;
-    // setCords({ x: x, y: y });
-    // setClientHeight(height);
-  };
-
+  //Todo - on each click add the text and render
   const handlePageTextClick = (e: React.MouseEvent) => {
+    console.log("ReactPdf.handlePageTextClick elementType: ", elementType);
     if (elementType === "text") {
       const rect = e.currentTarget.getBoundingClientRect();
       const heightAdjustment =
@@ -187,13 +165,29 @@ export default function ReactPdf() {
       const newDropText = {
         text: "Text Component",
         id: dropTexts.length,
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top - heightAdjustment,
+        position: {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top - heightAdjustment,
+        },
       };
+
+      setClientHeight(e.currentTarget.clientHeight);
       setDropTexts([...dropTexts, newDropText]);
     }
   };
 
+  //DnD
+  const handleDragEnd = (event: DragEndEvent) => {
+    console.log(event);
+
+    const { active, over, delta } = event;
+    console.log(`active.id: ${active.id}, delta: `, delta);
+    setPositions({ [active.id]: { x: delta.x, y: delta.y } });
+    console.log("Pos: ", positions);
+    // if (over) {
+    //   console.log(`Dropped ${active.id} over ${over.id}`);
+    // }
+  };
   //generate blanc white pdf for testing
   async function getPDFLength(pdfUrl: string) {
     const loadingTask = pdfjs.getDocument(pdfUrl);
@@ -240,37 +234,36 @@ export default function ReactPdf() {
               </DropButton>
               <Button onClick={downloadPDF}>Download PDF</Button>
             </div>
-            <Document
-              file={file}
-              onLoadSuccess={onDocumentLoadSuccess}
-              options={options}
-              // onClick={addO}
-            >
-              <div>
-                <Page
-                  key={`page_${currentPage + 1}`}
-                  pageNumber={currentPage + 1}
-                  width={
-                    containerWidth
-                      ? Math.min(containerWidth, maxWidth)
-                      : maxWidth
-                  }
-                  onMouseMove={handleMouseMove}
-                  onClick={handlePageTextClick}
-                >
-                  {dropTexts.map((dropText) => (
-                    <DropText
-                      key={dropText.id}
-                      style={{
-                        position: "absolute",
-                        left: dropText.x,
-                        top: dropText.y,
-                      }}
-                    />
-                  ))}
-                </Page>
-              </div>
-            </Document>
+            <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+              <DraggableText
+                id="1"
+                style={{
+                  position: "relative",
+                  zIndex: 9999,
+                  transform: positions["1"]
+                    ? `translate(${positions["1"].x}px, ${positions["1"].y}px)`
+                    : undefined,
+                }}
+              />
+              <Document
+                file={file}
+                onLoadSuccess={onDocumentLoadSuccess}
+                options={options}
+              >
+                <div>
+                  <Page
+                    key={`page_${currentPage + 1}`}
+                    pageNumber={currentPage + 1}
+                    width={
+                      containerWidth
+                        ? Math.min(containerWidth, maxWidth)
+                        : maxWidth
+                    }
+                    onClick={handlePageTextClick}
+                  ></Page>
+                </div>
+              </Document>
+            </DndContext>
             <Button onClick={prevPage}>Prevues</Button>
             {currentPage + 1}/{numPages}
             <Button onClick={nextPage}>Next</Button>
@@ -283,6 +276,7 @@ export default function ReactPdf() {
   );
 }
 
+//TODO - remove - generate blanc white pdf for testing
 const base64ToBlob = (base64: string) => {
   const prefix = "data:application/pdf;base64,";
   if (base64.startsWith(prefix)) {
