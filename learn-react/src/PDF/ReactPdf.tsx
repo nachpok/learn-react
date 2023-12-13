@@ -242,12 +242,14 @@ export default function ReactPdf() {
               <DraggableText
                 id="1"
                 style={{
-                  position: "relative",
                   zIndex: 9999,
+                  position: "relative",
+
                   transform: positionsRef.current["1"]
                     ? `translate(${positionsRef.current["1"].x}px, ${positionsRef.current["1"].y}px)`
                     : undefined,
                 }}
+                positions={positions}
               />
               <Document
                 file={file}

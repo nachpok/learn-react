@@ -7,18 +7,28 @@ import { MenuOutlined } from "@ant-design/icons";
 interface DraggableTextProps {
   id: string;
   style?: React.CSSProperties;
-  position?: { x: number; y: number };
+  positions: Positions;
 }
-export default function DraggableText({ id, style }: DraggableTextProps) {
+export default function DraggableText({
+  id,
+  style,
+  positions,
+}: DraggableTextProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id.toString(),
   });
 
+  const lastPosition = positions[id]?.x
+    ? { x: positions[id].x, y: positions[id].y }
+    : { x: 0, y: 0 };
   const transformStyle = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        transform: `translate3d(${transform.x + lastPosition.x}px, ${
+          transform.y + lastPosition.y
+        }px, 0)`,
       }
     : {};
+
   return (
     <div
       ref={setNodeRef}
