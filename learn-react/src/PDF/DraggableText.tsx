@@ -40,11 +40,15 @@ export default function DraggableText({
         <Input
           className="input-component"
           bordered
-          style={{ width: "20%" }}
+          style={{ width: "20%", borderRadius: "0", height: "32px" }}
         ></Input>
       </span>
-      <Button {...listeners} {...attributes}>
-        <MenuOutlined />
+      <Button
+        {...listeners}
+        {...attributes}
+        style={{ padding: "0px 2px ", borderRadius: "0" }}
+      >
+        |
       </Button>
     </div>
   );

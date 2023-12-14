@@ -159,10 +159,15 @@ export default function ReactPdf() {
   //Todo - on each click add the text and render
   const handlePageTextClick = (e: React.MouseEvent) => {
     console.log("ReactPdf.handlePageTextClick elementType: ", elementType);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const heightAdjustment =
+      e.clientY - rect.top > 18 ? 18 : e.clientY - rect.top;
+    const position = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top - heightAdjustment,
+    };
+    console.log("ReactPdf.handlePageTextClick location: ", position);
     if (elementType === "text") {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const heightAdjustment =
-        e.clientY - rect.top > 18 ? 18 : e.clientY - rect.top;
       const newDropText = {
         text: "Text Component",
         id: dropTexts.length,
@@ -181,16 +186,19 @@ export default function ReactPdf() {
   const positionsRef = useRef<Positions>({ "0": { x: 0, y: 0 } });
 
   const handleDragEnd = (event: DragEndEvent) => {
-    console.log(event);
+    // console.log(event);
 
-    const { active, over, delta } = event;
+    const { active, delta } = event;
+    const currentPosition = positionsRef.current[active.id];
+    const newPosition = {
+      x: currentPosition?.x + delta.x,
+      y: currentPosition?.y + delta.y,
+    };
+    console.log("Current Position: ", currentPosition, ", delta: ", delta);
+
+    // positionsRef.current[active.id] = newPosition;
     positionsRef.current[active.id] = { x: delta.x, y: delta.y };
-    console.log(`active.id: ${active.id}, delta: `, delta);
     setPositions({ [active.id]: { x: delta.x, y: delta.y } });
-    console.log("Pos: ", positions);
-    // if (over) {
-    //   console.log(`Dropped ${active.id} over ${over.id}`);
-    // }
   };
   //generate blanc white pdf for testing
   async function getPDFLength(pdfUrl: string) {
@@ -229,7 +237,7 @@ export default function ReactPdf() {
             <div style={{ display: "flex" }}>
               <DropButton
                 onClick={() => {
-                  elementType
+                  elementType == ElementType.text
                     ? setElementType(null)
                     : setElementType(ElementType.text);
                 }}
