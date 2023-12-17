@@ -19,7 +19,6 @@ import {
 
 import DropButton from "./DropComponentButton";
 import DraggableText from "./DraggableText";
-import { PointerSensor } from "@dnd-kit/core";
 import { SmartPointerSensor } from "./SmartPointerSensor";
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -75,7 +74,6 @@ export default function ReactPdf() {
   const [containerWidth, setContainerWidth] = useState<number>();
   const [elementType, setElementType] = useState<ElementType | null>();
   const [clientHeight, setClientHeight] = useState<number>(0);
-  const [dropTexts, setDropTexts] = useState<TextElement[]>([]);
 
   const [draggables, setDraggables] = useState<TextElement[]>([]);
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
@@ -119,19 +117,20 @@ export default function ReactPdf() {
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const pages = pdfDoc.getPages();
       const page = pages[currentPage];
-      const fontSize = 14;
+      const fontSize = 13;
       const pageHeight = page.getHeight();
       const pageSizeRatio = clientHeight / pageHeight;
       console.log(
         `downloadPDF - clientHeight: ${clientHeight},  pageHeight: ${pageHeight}`
       );
-      dropTexts.forEach((dropText) => {
-        page.drawText(dropText.text, {
-          x: dropText.downloadPosition.x / pageSizeRatio - 2,
-          y: pageHeight - dropText.downloadPosition.y / pageSizeRatio - 15,
+
+      draggables.forEach((d) => {
+        page.drawText(d.text, {
+          x: d.downloadPosition.x / pageSizeRatio - 2,
+          y: pageHeight - d.downloadPosition.y / pageSizeRatio - 15,
           size: fontSize,
           font: font,
-          color: rgb(0, 0.53, 0.71),
+          color: rgb(0, 0, 0),
         });
       });
 
@@ -142,14 +141,17 @@ export default function ReactPdf() {
       setFile(pdfFile);
       const dataUrl = URL.createObjectURL(blob);
       setPdfString(dataUrl);
-      const a = document.createElement("a");
-      if (a && pdfString) {
-        a.href = pdfString;
-        a.download = "uploaded.pdf";
-        a.click();
-      }
+      setDraggables([]);
     }
   };
+  useEffect(() => {
+    if (pdfString) {
+      const a = document.createElement("a");
+      a.href = pdfString;
+      a.download = "uploaded.pdf";
+      a.click();
+    }
+  }, [pdfString]);
   const nextPage = () => {
     if (numPages && currentPage < numPages - 1) {
       setCurrentPage(currentPage + 1);
@@ -160,43 +162,30 @@ export default function ReactPdf() {
       setCurrentPage(currentPage - 1);
     }
   };
-  const positionsRef = useRef<Positions>({});
 
-  //Todo - on each click add the text and render
   const newTextComponent = (e: React.MouseEvent) => {
     const reactBounding = e.currentTarget.getBoundingClientRect();
 
     //TODO replace 200 with dynamic value
     const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
 
-    const position = {
+    const localPosition = {
       x: e.clientX - reactBounding.left,
       y: yOnCanvas,
     };
+    const downloadPosition = {
+      x: e.clientX - reactBounding.left + 12,
+      y: e.clientY - reactBounding.top - 9,
+    };
     if (elementType === "text") {
       const newDraggableText = {
-        text: "Text Component",
+        text: "",
         id: draggables.length,
-        localPosition: position,
-        downloadPosition: position,
-      };
-      const len = draggables.length ? draggables.length : 0;
-      console.log("Y: ", position.y);
-      positionsRef.current[len] = {
-        x: position.x,
-        y: position.y,
+        localPosition: localPosition,
+        downloadPosition: downloadPosition,
       };
 
       setDraggables((prevDraggables) => [...prevDraggables, newDraggableText]);
-      // const newDropText = {
-      //   text: "Text Component",
-      //   id: dropTexts.length,
-      //   position: {
-      //     x: e.clientX - rect.left,
-      //     y: e.clientY - rect.top - heightAdjustment,
-      //   },
-      // };
-
       setClientHeight(e.currentTarget.clientHeight);
       setElementType(null);
     }
@@ -208,22 +197,37 @@ export default function ReactPdf() {
     console.log("handleDragEnd.e: ", event);
 
     const { active, delta } = event;
-    const currentPosition = positionsRef.current[active.id];
-    const newPosition = {
-      x: currentPosition?.x + delta.x,
-      y: currentPosition?.y + delta.y,
-    };
-    // console.log("Current Position: ", currentPosition, ", delta: ", delta);
+    const draggable = draggables.find((d) => d.id == active.id);
+    if (!draggable) {
+      throw Error("handleDragEnd - no draggable found");
+    }
+    const otherDraggables = draggables.filter((d) => d.id != active.id);
 
-    // positionsRef.current[active.id] = newPosition;
-    positionsRef.current[active.id] = { x: delta.x, y: delta.y };
-    const currentDraggable = draggables[parseInt(active.id.toString())];
-    currentDraggable.localPosition = { x: 0, y: 0 };
-    const newDraggables = draggables.filter(
-      (draggables) => draggables.id !== parseInt(active.id.toString())
-    );
-    // setDraggables(newDraggables);
-    // console.log("currentDraggable: ", currentDraggable);
+    const newLocalPosition = {
+      x: draggable.localPosition?.x + delta.x,
+      y: draggable.localPosition?.y + delta.y,
+    };
+    const newDownloadPosition = {
+      x: draggable.downloadPosition?.x + delta.x,
+      y: draggable.downloadPosition?.y + delta.y,
+    };
+
+    draggable.localPosition = newLocalPosition;
+    draggable.downloadPosition = newDownloadPosition;
+
+    setDraggables([draggable, ...otherDraggables]);
+  };
+
+  const handleInputValue = (id: string, value: string) => {
+    setDraggables((prevDraggables) => {
+      return prevDraggables.map((draggable) => {
+        if (draggable.id.toString() === id) {
+          return { ...draggable, text: value };
+        } else {
+          return draggable;
+        }
+      });
+    });
   };
   //generate blanc white pdf for testing
   async function getPDFLength(pdfUrl: string) {
@@ -245,9 +249,9 @@ export default function ReactPdf() {
       setPdfArrayBuffer(buffer);
     });
   }, []);
-  useEffect(() => {
-    console.log("draggables: ", draggables);
-  }, [draggables, elementType]);
+  // useEffect(() => {
+  //   console.log("draggables: ", draggables);
+  // }, [draggables, elementType]);
   return (
     <div className="PdfEditor">
       <header>
@@ -298,20 +302,10 @@ export default function ReactPdf() {
                         style={{
                           zIndex: 9999,
                           position: "absolute",
-                          // transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
-
                           transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
-                          // transform: positionsRef.current[
-                          //   draggable.id.toString()
-                          // ]
-                          //   ? `translate(${
-                          //       positionsRef.current[draggable.id.toString()].x
-                          //     }px, ${
-                          //       positionsRef.current[draggable.id.toString()].y
-                          //     }px)`
-                          //   : undefined,
                         }}
-                        position={positionsRef.current[draggable.id]}
+                        position={draggable.localPosition}
+                        handleInputValue={handleInputValue}
                       />
                     ))}
                   </Page>

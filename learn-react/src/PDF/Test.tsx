@@ -24,6 +24,9 @@ function Test() {
       [active.id]: newPosition,
     });
   };
+  const handleInputValue = (id: string, value: string) => {
+    // handle the value here
+  };
 
   return (
     <>
@@ -39,6 +42,7 @@ function Test() {
                 : undefined,
             }}
             position={positions["1"]}
+            handleInputValue={handleInputValue}
           />
         </DndContext>
       </div>

@@ -8,21 +8,24 @@ interface DraggableTextProps {
   id: string;
   style?: React.CSSProperties;
   position: Position;
+  handleInputValue: (id: string, value: string) => void;
 }
 export default function DraggableText({
   id,
   style,
   position,
+  handleInputValue,
 }: DraggableTextProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id.toString(),
   });
   const [isInputFocused, setInputFocused] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [inputLen, setInputLen] = useState(5);
+  const [inputLen, setInputLen] = useState(10);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
-    setInputLen(inputValue.length > 5 ? inputValue.length : 5);
+    setInputLen(inputValue.length > 10 ? inputValue.length : 10);
+    handleInputValue(id, e.target.value);
   };
   const lastPosition = position?.x
     ? { x: position.x, y: position.y }
