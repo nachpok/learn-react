@@ -38,7 +38,7 @@ function Test() {
                 ? `translate(${positionsRef.current["1"].x}px, ${positionsRef.current["1"].y}px)`
                 : undefined,
             }}
-            positions={positions}
+            position={positions["1"]}
           />
         </DndContext>
       </div>

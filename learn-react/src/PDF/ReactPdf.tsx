@@ -45,12 +45,17 @@ enum ElementType {
 interface TextElement {
   text: string;
   id: number;
-  position: {
+
+  localPosition: {
+    x: number;
+    y: number;
+  };
+  downloadPosition: {
     x: number;
     y: number;
   };
 }
-type Position = {
+export type Position = {
   x: number;
   y: number;
 };
@@ -72,7 +77,7 @@ export default function ReactPdf() {
   const [clientHeight, setClientHeight] = useState<number>(0);
   const [dropTexts, setDropTexts] = useState<TextElement[]>([]);
 
-  const [positions, setPositions] = useState<Positions>({});
+  const [draggables, setDraggables] = useState<TextElement[]>([]);
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
 
@@ -122,8 +127,8 @@ export default function ReactPdf() {
       );
       dropTexts.forEach((dropText) => {
         page.drawText(dropText.text, {
-          x: dropText.position.x / pageSizeRatio - 2,
-          y: pageHeight - dropText.position.y / pageSizeRatio - 15,
+          x: dropText.downloadPosition.x / pageSizeRatio - 2,
+          y: pageHeight - dropText.downloadPosition.y / pageSizeRatio - 15,
           size: fontSize,
           font: font,
           color: rgb(0, 0.53, 0.71),
@@ -155,38 +160,57 @@ export default function ReactPdf() {
       setCurrentPage(currentPage - 1);
     }
   };
+  const positionsRef = useRef<Positions>({});
 
   //Todo - on each click add the text and render
-  const handlePageTextClick = (e: React.MouseEvent) => {
-    console.log("ReactPdf.handlePageTextClick elementType: ", elementType);
-    const rect = e.currentTarget.getBoundingClientRect();
-    const heightAdjustment =
-      e.clientY - rect.top > 18 ? 18 : e.clientY - rect.top;
+  const newTextComponent = (e: React.MouseEvent) => {
+    console.log("e.currentTarget.clientHeight: ", e.currentTarget.clientHeight);
+    console.log("ReactPdf.handlePageTextClick.e: ", e);
+    const reactBounding = e.currentTarget.getBoundingClientRect();
+    console.log("reactBounding.bottom: ", reactBounding.bottom);
+    //avoid placing input above the component
+    const adjustedY =
+      e.clientY - reactBounding.top > 18 ? 18 : e.clientY - reactBounding.top;
+    const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
+    console.log("yOnCanvas: ", yOnCanvas);
     const position = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top - heightAdjustment,
+      x: e.clientX - reactBounding.left,
+      y: yOnCanvas,
     };
-    console.log("ReactPdf.handlePageTextClick location: ", position);
+    // console.log("ReactPdf.handlePageTextClick location: ", position);
     if (elementType === "text") {
-      const newDropText = {
+      const newDraggableText = {
         text: "Text Component",
-        id: dropTexts.length,
-        position: {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top - heightAdjustment,
-        },
+        id: draggables.length,
+        localPosition: position,
+        downloadPosition: position,
+      };
+      const len = draggables.length ? draggables.length : 0;
+      console.log("Y: ", position.y);
+      positionsRef.current[len] = {
+        x: position.x,
+        y: position.y,
       };
 
+      setDraggables((prevDraggables) => [...prevDraggables, newDraggableText]);
+      // const newDropText = {
+      //   text: "Text Component",
+      //   id: dropTexts.length,
+      //   position: {
+      //     x: e.clientX - rect.left,
+      //     y: e.clientY - rect.top - heightAdjustment,
+      //   },
+      // };
+
       setClientHeight(e.currentTarget.clientHeight);
-      setDropTexts([...dropTexts, newDropText]);
+      setElementType(null);
     }
   };
 
   //DnD
-  const positionsRef = useRef<Positions>({ "0": { x: 0, y: 0 } });
 
   const handleDragEnd = (event: DragEndEvent) => {
-    // console.log(event);
+    console.log("handleDragEnd.e: ", event);
 
     const { active, delta } = event;
     const currentPosition = positionsRef.current[active.id];
@@ -194,11 +218,17 @@ export default function ReactPdf() {
       x: currentPosition?.x + delta.x,
       y: currentPosition?.y + delta.y,
     };
-    console.log("Current Position: ", currentPosition, ", delta: ", delta);
+    // console.log("Current Position: ", currentPosition, ", delta: ", delta);
 
     // positionsRef.current[active.id] = newPosition;
     positionsRef.current[active.id] = { x: delta.x, y: delta.y };
-    setPositions({ [active.id]: { x: delta.x, y: delta.y } });
+    const currentDraggable = draggables[parseInt(active.id.toString())];
+    currentDraggable.localPosition = { x: 0, y: 0 };
+    const newDraggables = draggables.filter(
+      (draggables) => draggables.id !== parseInt(active.id.toString())
+    );
+    // setDraggables(newDraggables);
+    // console.log("currentDraggable: ", currentDraggable);
   };
   //generate blanc white pdf for testing
   async function getPDFLength(pdfUrl: string) {
@@ -220,7 +250,9 @@ export default function ReactPdf() {
       setPdfArrayBuffer(buffer);
     });
   }, []);
-
+  useEffect(() => {
+    console.log("draggables: ", draggables);
+  }, [draggables, elementType]);
   return (
     <div className="PdfEditor">
       <header>
@@ -236,6 +268,7 @@ export default function ReactPdf() {
           <div className="PdfEditor__container__document" ref={setContainerRef}>
             <div style={{ display: "flex" }}>
               <DropButton
+                isClicked={elementType === ElementType.text}
                 onClick={() => {
                   elementType == ElementType.text
                     ? setElementType(null)
@@ -247,18 +280,6 @@ export default function ReactPdf() {
               <Button onClick={downloadPDF}>Download PDF</Button>
             </div>
             <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-              <DraggableText
-                id="1"
-                style={{
-                  zIndex: 9999,
-                  position: "relative",
-
-                  transform: positionsRef.current["1"]
-                    ? `translate(${positionsRef.current["1"].x}px, ${positionsRef.current["1"].y}px)`
-                    : undefined,
-                }}
-                positions={positions}
-              />
               <Document
                 file={file}
                 onLoadSuccess={onDocumentLoadSuccess}
@@ -273,8 +294,31 @@ export default function ReactPdf() {
                         ? Math.min(containerWidth, maxWidth)
                         : maxWidth
                     }
-                    onClick={handlePageTextClick}
-                  ></Page>
+                    onClick={newTextComponent}
+                  >
+                    {draggables.map((draggable) => (
+                      <DraggableText
+                        key={draggable.id}
+                        id={draggable.id.toString()}
+                        style={{
+                          zIndex: 9999,
+                          position: "absolute",
+                          // transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
+
+                          transform: positionsRef.current[
+                            draggable.id.toString()
+                          ]
+                            ? `translate(${
+                                positionsRef.current[draggable.id.toString()].x
+                              }px, ${
+                                positionsRef.current[draggable.id.toString()].y
+                              }px)`
+                            : undefined,
+                        }}
+                        position={positionsRef.current[draggable.id]}
+                      />
+                    ))}
+                  </Page>
                 </div>
               </Document>
             </DndContext>

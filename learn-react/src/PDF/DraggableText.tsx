@@ -1,25 +1,25 @@
 import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "antd";
 import { useState } from "react";
-import { Positions } from "./ReactPdf";
+import { Position } from "./ReactPdf";
 import { MenuOutlined } from "@ant-design/icons";
 
 interface DraggableTextProps {
   id: string;
   style?: React.CSSProperties;
-  positions: Positions;
+  position: Position;
 }
 export default function DraggableText({
   id,
   style,
-  positions,
+  position,
 }: DraggableTextProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id.toString(),
   });
 
-  const lastPosition = positions[id]?.x
-    ? { x: positions[id].x, y: positions[id].y }
+  const lastPosition = position?.x
+    ? { x: position.x, y: position.y }
     : { x: 0, y: 0 };
   const transformStyle = transform
     ? {
