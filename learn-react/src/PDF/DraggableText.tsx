@@ -17,7 +17,13 @@ export default function DraggableText({
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id.toString(),
   });
-
+  const [isInputFocused, setInputFocused] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [inputLen, setInputLen] = useState(5);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    setInputLen(inputValue.length > 5 ? inputValue.length : 5);
+  };
   const lastPosition = position?.x
     ? { x: position.x, y: position.y }
     : { x: 0, y: 0 };
@@ -35,21 +41,31 @@ export default function DraggableText({
       style={{ ...style, ...transformStyle }}
       {...listeners}
       {...attributes}
+      onMouseEnter={() => setInputFocused(true)}
+      onMouseLeave={() => setInputFocused(false)}
     >
       <span>
         <Input
           className="input-component"
           bordered
-          style={{ width: "20%", borderRadius: "0", height: "32px" }}
+          style={{
+            width: `${inputLen}ch`,
+            borderRadius: "0",
+            height: "32px",
+            backgroundColor: "transparent",
+          }}
+          onInput={handleInputChange}
         ></Input>
       </span>
-      <Button
-        {...listeners}
-        {...attributes}
-        style={{ padding: "0px 2px ", borderRadius: "0" }}
-      >
-        |
-      </Button>
+      {isInputFocused ? (
+        <Button
+          {...listeners}
+          {...attributes}
+          style={{ padding: "0px 2px ", borderRadius: "0" }}
+        >
+          |
+        </Button>
+      ) : null}
     </div>
   );
 }

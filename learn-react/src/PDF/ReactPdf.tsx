@@ -164,20 +164,15 @@ export default function ReactPdf() {
 
   //Todo - on each click add the text and render
   const newTextComponent = (e: React.MouseEvent) => {
-    console.log("e.currentTarget.clientHeight: ", e.currentTarget.clientHeight);
-    console.log("ReactPdf.handlePageTextClick.e: ", e);
     const reactBounding = e.currentTarget.getBoundingClientRect();
-    console.log("reactBounding.bottom: ", reactBounding.bottom);
-    //avoid placing input above the component
-    const adjustedY =
-      e.clientY - reactBounding.top > 18 ? 18 : e.clientY - reactBounding.top;
+
+    //TODO replace 200 with dynamic value
     const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
-    console.log("yOnCanvas: ", yOnCanvas);
+
     const position = {
       x: e.clientX - reactBounding.left,
       y: yOnCanvas,
     };
-    // console.log("ReactPdf.handlePageTextClick location: ", position);
     if (elementType === "text") {
       const newDraggableText = {
         text: "Text Component",
@@ -305,15 +300,16 @@ export default function ReactPdf() {
                           position: "absolute",
                           // transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
 
-                          transform: positionsRef.current[
-                            draggable.id.toString()
-                          ]
-                            ? `translate(${
-                                positionsRef.current[draggable.id.toString()].x
-                              }px, ${
-                                positionsRef.current[draggable.id.toString()].y
-                              }px)`
-                            : undefined,
+                          transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
+                          // transform: positionsRef.current[
+                          //   draggable.id.toString()
+                          // ]
+                          //   ? `translate(${
+                          //       positionsRef.current[draggable.id.toString()].x
+                          //     }px, ${
+                          //       positionsRef.current[draggable.id.toString()].y
+                          //     }px)`
+                          //   : undefined,
                         }}
                         position={positionsRef.current[draggable.id]}
                       />
