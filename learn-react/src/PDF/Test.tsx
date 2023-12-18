@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { DndContext, DragEndEvent, useDraggable } from "@dnd-kit/core";
 import DraggableText from "./DraggableText";
 import { Positions } from "./ReactPdf";
 import { SmartPointerSensor } from "./SmartPointerSensor";
 import { useSensor, useSensors } from "@dnd-kit/core";
-import { de } from "@faker-js/faker";
 
 function Test() {
   const sensors = useSensors(useSensor(SmartPointerSensor));

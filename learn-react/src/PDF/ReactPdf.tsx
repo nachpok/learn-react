@@ -2,17 +2,17 @@ import React, { useRef } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useResizeObserver } from "@wojtekmaj/react-hooks";
 import { pdfjs, Document, Page } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
+// import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+// import "react-pdf/dist/esm/Page/TextLayer.css";
 import { PDFDocument, StandardFonts, rgb, setLineHeight } from "pdf-lib";
 import { Button } from "antd";
-import "pdfjs-dist/build/pdf.worker.entry";
+// import "pdfjs-dist/build/pdf.worker.entry";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import {
   DndContext,
   DragEndEvent,
-  MouseSensor,
-  useDraggable,
+  // MouseSensor,
+  // useDraggable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -33,10 +33,7 @@ const options = {
 const resizeObserverOptions = {};
 
 const maxWidth = 1920;
-interface Cords {
-  x: number;
-  y: number;
-}
+
 enum ElementType {
   text = "text",
   sign = "sign",
@@ -54,6 +51,7 @@ interface TextElement {
     y: number;
   };
 }
+
 export type Position = {
   x: number;
   y: number;
@@ -121,9 +119,9 @@ export default function ReactPdf() {
       const fontSize = 13;
       const pageHeight = page.getHeight();
       const pageSizeRatio = clientHeight / pageHeight;
-      console.log(
-        `downloadPDF - clientHeight: ${clientHeight},  pageHeight: ${pageHeight}`
-      );
+      // console.log(
+      //   `downloadPDF - clientHeight: ${clientHeight},  pageHeight: ${pageHeight}`
+      // );
 
       draggables.forEach((d) => {
         page.drawText(d.text, {
@@ -156,6 +154,7 @@ export default function ReactPdf() {
       setShouldDownload(false);
     }
   }, [shouldDownload]);
+
   const nextPage = () => {
     if (numPages && currentPage < numPages - 1) {
       setCurrentPage(currentPage + 1);
@@ -169,7 +168,6 @@ export default function ReactPdf() {
 
   const newTextComponent = (e: React.MouseEvent) => {
     const reactBounding = e.currentTarget.getBoundingClientRect();
-
     //TODO replace 200 with dynamic value
     const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
 
@@ -181,6 +179,7 @@ export default function ReactPdf() {
       x: e.clientX - reactBounding.left + 12,
       y: e.clientY - reactBounding.top - 9,
     };
+
     if (elementType === "text") {
       const newDraggableText = {
         text: "",
@@ -197,8 +196,6 @@ export default function ReactPdf() {
       setElementType(null);
     }
   };
-
-  //DnD
 
   const handleDragEnd = (event: DragEndEvent) => {
     console.log("handleDragEnd.e: ", event);
@@ -256,9 +253,7 @@ export default function ReactPdf() {
       setPdfArrayBuffer(buffer);
     });
   }, []);
-  // useEffect(() => {
-  //   console.log("draggables: ", draggables);
-  // }, [draggables, elementType]);
+
   return (
     <div className="PdfEditor">
       <header>

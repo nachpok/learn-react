@@ -2,7 +2,6 @@ import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "antd";
 import { useState } from "react";
 import { Position } from "./ReactPdf";
-import { MenuOutlined } from "@ant-design/icons";
 
 interface DraggableTextProps {
   id: string;
