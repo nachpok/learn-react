@@ -234,25 +234,25 @@ export default function ReactPdf() {
     });
   };
   //generate blanc white pdf for testing
-  async function getPDFLength(pdfUrl: string) {
-    const loadingTask = pdfjs.getDocument(pdfUrl);
-    const pdf = await loadingTask.promise;
-    const numPages = pdf.numPages;
-    return numPages;
-  }
-  useEffect(() => {
-    const blob = base64ToBlob(fileBase64);
-    const dataUrl = URL.createObjectURL(blob);
-    setPdfString(dataUrl);
-    const len = getPDFLength(dataUrl).then((len) => {
-      setNumPages(len);
-    });
-    const pdfFile = new File([blob], "sample", { type: "application/pdf" });
-    setFile(pdfFile);
-    const buffer = pdfFile.arrayBuffer().then((buffer) => {
-      setPdfArrayBuffer(buffer);
-    });
-  }, []);
+  // async function getPDFLength(pdfUrl: string) {
+  //   const loadingTask = pdfjs.getDocument(pdfUrl);
+  //   const pdf = await loadingTask.promise;
+  //   const numPages = pdf.numPages;
+  //   return numPages;
+  // }
+  // useEffect(() => {
+  //   const blob = base64ToBlob(fileBase64);
+  //   const dataUrl = URL.createObjectURL(blob);
+  //   setPdfString(dataUrl);
+  //   const len = getPDFLength(dataUrl).then((len) => {
+  //     setNumPages(len);
+  //   });
+  //   const pdfFile = new File([blob], "sample", { type: "application/pdf" });
+  //   setFile(pdfFile);
+  //   const buffer = pdfFile.arrayBuffer().then((buffer) => {
+  //     setPdfArrayBuffer(buffer);
+  //   });
+  // }, []);
 
   return (
     <div className="PdfEditor">
