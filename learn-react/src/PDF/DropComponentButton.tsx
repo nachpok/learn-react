@@ -18,15 +18,13 @@ const DropButton: React.FC<DropButtonProps> = ({
   };
 
   return (
-    <div className="App">
-      <Button
-        type="default"
-        className={`custom-button ${isClicked ? "clicked" : ""}`}
-        onClick={handleClick}
-      >
-        {children}
-      </Button>
-    </div>
+    <Button
+      type="default"
+      className={`custom-button ${isClicked ? "clicked" : ""}`}
+      onClick={handleClick}
+    >
+      {children}
+    </Button>
   );
 };
 
