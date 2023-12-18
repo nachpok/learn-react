@@ -39,8 +39,10 @@ function DrawSign({ onSign }: DrawSignProps) {
     if (!signaturePad) {
       throw Error("DrawSign.save - No signaturePad");
     }
+    console.log("DrawSign.save.signaturePad: ", signaturePad);
     const sign = signaturePad.toSVG();
     onSign(sign);
+    console.log("DrawSign.save.sign: ", sign);
   };
 
   return (

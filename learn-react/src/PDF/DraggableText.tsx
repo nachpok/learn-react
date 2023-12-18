@@ -1,19 +1,21 @@
 import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "antd";
 import { useState } from "react";
-import { Position } from "./ReactPdf";
+import { ElementType, Position } from "./ReactPdf";
 
 interface DraggableTextProps {
   id: string;
   style?: React.CSSProperties;
   position: Position;
   handleInputValue: (id: string, value: string) => void;
+  setDraggedElementType: (newElementType: ElementType) => void;
 }
 export default function DraggableText({
   id,
   style,
   position,
   handleInputValue,
+  setDraggedElementType,
 }: DraggableTextProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id.toString(),
@@ -64,6 +66,12 @@ export default function DraggableText({
           {...listeners}
           {...attributes}
           style={{ padding: "0px 2px ", borderRadius: "0" }}
+          onMouseDown={() => {
+            setDraggedElementType(ElementType.text);
+          }}
+          onMouseUp={() => {
+            setDraggedElementType(ElementType.empty);
+          }}
         >
           |
         </Button>

@@ -11,16 +11,18 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import {
   DndContext,
   DragEndEvent,
+  DragStartEvent,
   // MouseSensor,
   // useDraggable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import "./Sample.css";
 
-import DropButton from "./DropComponentButton";
 import DraggableText from "./DraggableText";
 import { SmartPointerSensor } from "./SmartPointerSensor";
 import SignPopover from "./SignPopover";
+import DraggableSignature from "./DraggableSignature";
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
   import.meta.url
@@ -35,13 +37,14 @@ const resizeObserverOptions = {};
 
 const maxWidth = 1920;
 
-enum ElementType {
+export enum ElementType {
   text = "text",
   sign = "sign",
+  empty = "empty",
 }
-interface TextElement {
+interface DraggableElement {
   text: string;
-  id: number;
+  id: string;
 
   localPosition: {
     x: number;
@@ -71,11 +74,20 @@ export default function ReactPdf() {
   const [numPages, setNumPages] = useState<number>();
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
-  const [elementType, setElementType] = useState<ElementType | null>();
+  const [elementType, setElementType] = useState<ElementType>(
+    ElementType.empty
+  );
   const [clientHeight, setClientHeight] = useState<number>(0);
   const [shouldDownload, setShouldDownload] = useState(false);
-  const [draggables, setDraggables] = useState<TextElement[]>([]);
-  const [idCounter, setIdCounter] = useState<number>(0);
+  const [draggableTexts, setDraggableTexts] = useState<DraggableElement[]>([]);
+  const [draggableSignatures, setDraggableSignatures] = useState<
+    DraggableElement[]
+  >([]);
+  const [draggedElementType, setDraggedElementType] = useState<ElementType>(
+    ElementType.empty
+  );
+  const [textIdCounter, setTextIdCounter] = useState<number>(0);
+  const [signIdCounter, setSignIdCounter] = useState<number>(0);
   const [svg, setSvg] = useState<string>("");
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
@@ -125,7 +137,7 @@ export default function ReactPdf() {
       //   `downloadPDF - clientHeight: ${clientHeight},  pageHeight: ${pageHeight}`
       // );
 
-      draggables.forEach((d) => {
+      draggableTexts.forEach((d) => {
         page.drawText(d.text, {
           x: d.downloadPosition.x / pageSizeRatio - 2,
           y: pageHeight - d.downloadPosition.y / pageSizeRatio - 15,
@@ -144,7 +156,7 @@ export default function ReactPdf() {
       setPdfString(dataUrl);
       setShouldDownload(true);
 
-      setDraggables([]);
+      setDraggableTexts([]);
     }
   };
   useEffect(() => {
@@ -168,7 +180,7 @@ export default function ReactPdf() {
     }
   };
 
-  const newTextComponent = (e: React.MouseEvent) => {
+  const addNewComponent = (e: React.MouseEvent) => {
     const reactBounding = e.currentTarget.getBoundingClientRect();
     //TODO replace 200 with dynamic value
     const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
@@ -182,20 +194,44 @@ export default function ReactPdf() {
       y: e.clientY - reactBounding.top - 9,
     };
 
-    if (elementType === "text") {
+    if (elementType === ElementType.text) {
       const newDraggableText = {
         text: "",
-        id: idCounter,
+        id: "t-" + textIdCounter,
         localPosition: localPosition,
         downloadPosition: downloadPosition,
       };
-      setIdCounter((prevIdCounter) => prevIdCounter + 1);
-      if (draggables.length && draggables[draggables.length - 1].text === "") {
-        setDraggables((prevDraggables) => prevDraggables.slice(0, -1));
+      setTextIdCounter((prevIdCounter) => prevIdCounter + 1);
+      if (
+        draggableTexts.length &&
+        draggableTexts[draggableTexts.length - 1].text === ""
+      ) {
+        setDraggableTexts((prevDraggables) => prevDraggables.slice(0, -1));
       }
-      setDraggables((prevDraggables) => [...prevDraggables, newDraggableText]);
+      setDraggableTexts((prevDraggables) => [
+        ...prevDraggables,
+        newDraggableText,
+      ]);
       setClientHeight(e.currentTarget.clientHeight);
-      setElementType(null);
+      setElementType(ElementType.empty);
+    }
+    if (elementType === ElementType.sign) {
+      if (!svg) {
+        //TODO handle
+      }
+      const newDraggableSignature = {
+        text: svg,
+        id: "s-" + signIdCounter,
+        localPosition: localPosition,
+        downloadPosition: downloadPosition,
+      };
+      setSignIdCounter((prevIdCounter) => prevIdCounter + 1);
+      setDraggableSignatures((prevSignatures) => [
+        ...prevSignatures,
+        newDraggableSignature,
+      ]);
+      setClientHeight(e.currentTarget.clientHeight);
+      setElementType(ElementType.empty);
     }
   };
 
@@ -203,11 +239,17 @@ export default function ReactPdf() {
     console.log("handleDragEnd.e: ", event);
 
     const { active, delta } = event;
-    const draggable = draggables.find((d) => d.id == active.id);
+    const id: string = active.id.toString();
+    let draggable;
+    if (id.charAt(0) === "t") {
+      draggable = draggableTexts.find((d) => d.id == active.id);
+    }
+    if (id.charAt(0) === "s") {
+      draggable = draggableSignatures.find((d) => d.id == active.id);
+    }
     if (!draggable) {
       throw Error("handleDragEnd - no draggable found");
     }
-    const otherDraggables = draggables.filter((d) => d.id != active.id);
 
     const newLocalPosition = {
       x: draggable.localPosition?.x + delta.x,
@@ -220,12 +262,20 @@ export default function ReactPdf() {
 
     draggable.localPosition = newLocalPosition;
     draggable.downloadPosition = newDownloadPosition;
-
-    setDraggables([draggable, ...otherDraggables]);
+    if (id.charAt(0) === "t") {
+      const otherDraggables = draggableTexts.filter((d) => d.id != active.id);
+      setDraggableTexts([draggable, ...otherDraggables]);
+    }
+    if (id.charAt(0) === "s") {
+      const otherDraggables = draggableSignatures.filter(
+        (d) => d.id != active.id
+      );
+      setDraggableSignatures([draggable, ...otherDraggables]);
+    }
   };
 
   const handleInputValue = (id: string, value: string) => {
-    setDraggables((prevDraggables) => {
+    setDraggableTexts((prevDraggables) => {
       return prevDraggables.map((draggable) => {
         if (draggable.id.toString() === id) {
           return { ...draggable, text: value };
@@ -258,7 +308,9 @@ export default function ReactPdf() {
     //Set SVG
     setSvg(sampleSVG);
   }, []);
-
+  useEffect(() => {
+    console.log("Sing: ", draggableSignatures);
+  });
   return (
     <div className="PdfEditor">
       <header>
@@ -273,19 +325,23 @@ export default function ReactPdf() {
         {file ? (
           <div className="PdfEditor__container__document" ref={setContainerRef}>
             <div style={{ display: "flex" }}>
-              <DropButton
-                isClicked={elementType === ElementType.text}
+              <Button
+                type={elementType === ElementType.text ? "primary" : "default"}
                 onClick={() => {
                   elementType == ElementType.text
-                    ? setElementType(null)
+                    ? setElementType(ElementType.empty)
                     : setElementType(ElementType.text);
                 }}
               >
                 Text
-              </DropButton>
+              </Button>
               <span style={{ width: "10px" }}></span>
-              <SignPopover svg={svg} onNewSignature={setSvg} />
-
+              <SignPopover
+                svg={svg}
+                onNewSignature={setSvg}
+                elementType={elementType}
+                setElementType={setElementType}
+              />
               <span style={{ width: "10px" }}></span>
               <Button onClick={downloadPDF}>Download PDF</Button>
             </div>
@@ -304,9 +360,9 @@ export default function ReactPdf() {
                         ? Math.min(containerWidth, maxWidth)
                         : maxWidth
                     }
-                    onClick={newTextComponent}
+                    onClick={addNewComponent}
                   >
-                    {draggables.map((draggable) => (
+                    {draggableTexts.map((draggable) => (
                       <DraggableText
                         key={draggable.id}
                         id={draggable.id.toString()}
@@ -317,6 +373,20 @@ export default function ReactPdf() {
                         }}
                         position={draggable.localPosition}
                         handleInputValue={handleInputValue}
+                        setDraggedElementType={setDraggedElementType}
+                      />
+                    ))}
+                    {draggableSignatures.map((signature) => (
+                      <DraggableSignature
+                        key={signature.id}
+                        id={signature.id.toString()}
+                        style={{
+                          zIndex: 5555,
+                          position: "absolute",
+                          transform: `translate(${signature.localPosition.x}px, ${signature.localPosition.y}px)`,
+                        }}
+                        svg={svg}
+                        position={signature.localPosition}
                       />
                     ))}
                   </Page>

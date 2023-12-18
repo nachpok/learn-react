@@ -1,11 +1,19 @@
 import React, { useState } from "react";
 import { Button, Popover, Modal } from "antd";
 import DrawSign from "./DrawSign";
+import { ElementType } from "./ReactPdf";
 interface SignPopoverProps {
   svg: string;
+  elementType: ElementType;
+  setElementType: (newElementType: ElementType) => void;
   onNewSignature: (sign: string) => void;
 }
-const SignPopover: React.FC<SignPopoverProps> = ({ svg, onNewSignature }) => {
+const SignPopover: React.FC<SignPopoverProps> = ({
+  svg,
+  onNewSignature,
+  elementType,
+  setElementType,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const showModal = () => {
@@ -33,7 +41,16 @@ const SignPopover: React.FC<SignPopoverProps> = ({ svg, onNewSignature }) => {
           alignItems: "center",
         }}
       >
-        <Button>Use Signature</Button>
+        <Button
+          onClick={() => {
+            elementType === ElementType.sign
+              ? setElementType(ElementType.empty)
+              : setElementType(ElementType.sign);
+          }}
+        >
+          Use Signature
+        </Button>
+
         <Button onClick={showModal}>New Signature</Button>
       </div>
     </div>
@@ -52,7 +69,11 @@ const SignPopover: React.FC<SignPopoverProps> = ({ svg, onNewSignature }) => {
       </Modal>
       {svg ? (
         <Popover placement="bottom" content={content}>
-          <Button>Sign PDF</Button>
+          <Button
+            type={elementType === ElementType.sign ? "primary" : "default"}
+          >
+            Sign PDF
+          </Button>
         </Popover>
       ) : (
         <Button onClick={showModal}>New Signature</Button>
