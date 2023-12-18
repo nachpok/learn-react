@@ -24,7 +24,7 @@ export default function DraggableText({
   const [inputLen, setInputLen] = useState(10);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
-    setInputLen(inputValue.length > 10 ? inputValue.length : 10);
+    setInputLen(inputValue.length > 10 ? inputValue.length + 2 : 10);
     handleInputValue(id, e.target.value);
   };
   const lastPosition = position?.x

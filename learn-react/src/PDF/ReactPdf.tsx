@@ -74,8 +74,9 @@ export default function ReactPdf() {
   const [containerWidth, setContainerWidth] = useState<number>();
   const [elementType, setElementType] = useState<ElementType | null>();
   const [clientHeight, setClientHeight] = useState<number>(0);
-
+  const [shouldDownload, setShouldDownload] = useState(false);
   const [draggables, setDraggables] = useState<TextElement[]>([]);
+  const [idCounter, setIdCounter] = useState<number>(0);
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
 
@@ -141,17 +142,20 @@ export default function ReactPdf() {
       setFile(pdfFile);
       const dataUrl = URL.createObjectURL(blob);
       setPdfString(dataUrl);
+      setShouldDownload(true);
+
       setDraggables([]);
     }
   };
   useEffect(() => {
-    if (pdfString) {
+    if (pdfString && shouldDownload) {
       const a = document.createElement("a");
       a.href = pdfString;
       a.download = "uploaded.pdf";
       a.click();
+      setShouldDownload(false);
     }
-  }, [pdfString]);
+  }, [shouldDownload]);
   const nextPage = () => {
     if (numPages && currentPage < numPages - 1) {
       setCurrentPage(currentPage + 1);
@@ -180,11 +184,14 @@ export default function ReactPdf() {
     if (elementType === "text") {
       const newDraggableText = {
         text: "",
-        id: draggables.length,
+        id: idCounter,
         localPosition: localPosition,
         downloadPosition: downloadPosition,
       };
-
+      setIdCounter((prevIdCounter) => prevIdCounter + 1);
+      if (draggables.length && draggables[draggables.length - 1].text === "") {
+        setDraggables((prevDraggables) => prevDraggables.slice(0, -1));
+      }
       setDraggables((prevDraggables) => [...prevDraggables, newDraggableText]);
       setClientHeight(e.currentTarget.clientHeight);
       setElementType(null);
