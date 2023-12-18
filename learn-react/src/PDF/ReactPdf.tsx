@@ -6,7 +6,7 @@ import { pdfjs, Document, Page } from "react-pdf";
 // import "react-pdf/dist/esm/Page/TextLayer.css";
 import { PDFDocument, StandardFonts, rgb, setLineHeight } from "pdf-lib";
 import { Button } from "antd";
-// import "pdfjs-dist/build/pdf.worker.entry";
+import "pdfjs-dist/build/pdf.worker.entry";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import {
   DndContext,
