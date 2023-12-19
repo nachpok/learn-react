@@ -35,7 +35,7 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="todo" element={<List />} />
             <Route path="pdf-editor" element={<ReactPdf />} />
-            <Route path="test" element={<Test />} />
+            {/* <Route path="test" element={<Test />} /> */}
           </Route>
           <Route path="*" element={<HomePage />} />
         </Routes>

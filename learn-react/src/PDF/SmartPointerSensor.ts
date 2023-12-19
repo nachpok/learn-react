@@ -21,10 +21,9 @@ export class SmartPointerSensor extends PointerSensor {
   ];
 }
 
-//Added path & svg for clearing dropdown
 function isInteractiveElement(element: Element | null) {
   const interactiveElementType = ["svg"];
-  const interactiveClasses = ["input-component"];
+  const interactiveClasses = ["input-component", "test-class"];
 
   if (
     (element?.tagName &&

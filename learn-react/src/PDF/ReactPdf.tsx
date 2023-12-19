@@ -17,8 +17,8 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-// import "./Sample.css";
-
+import "./Sample.css";
+import { degrees } from "pdf-lib";
 import DraggableText from "./DraggableText";
 import { SmartPointerSensor } from "./SmartPointerSensor";
 import SignPopover from "./SignPopover";
@@ -138,6 +138,7 @@ export default function ReactPdf() {
       // );
 
       draggableTexts.forEach((d) => {
+        console.log("ReactPdf.downloadPDF.d: ", d);
         page.drawText(d.text, {
           x: d.downloadPosition.x / pageSizeRatio - 2,
           y: pageHeight - d.downloadPosition.y / pageSizeRatio - 15,
@@ -146,7 +147,27 @@ export default function ReactPdf() {
           color: rgb(0, 0, 0),
         });
       });
+      draggableSignatures.forEach((d) => {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(d.text, "image/svg+xml");
+        const pathElements = svgDoc.querySelectorAll("path");
 
+        for (let i = 0; i < pathElements.length; i++) {
+          const pathData = pathElements[i].getAttribute("d");
+
+          if (pathData) {
+            page.drawSvgPath(pathData, {
+              x: d.downloadPosition.x / pageSizeRatio - 2,
+              y: d.downloadPosition.y / pageSizeRatio,
+              scale: 0.4,
+              rotate: degrees(0),
+              color: rgb(1, 0, 0),
+              borderColor: rgb(0, 0, 0),
+              borderWidth: 1,
+            });
+          }
+        }
+      });
       const pdfBytes = await pdfDoc.save();
       setPdfArrayBuffer(pdfBytes);
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -157,6 +178,7 @@ export default function ReactPdf() {
       setShouldDownload(true);
 
       setDraggableTexts([]);
+      setDraggableSignatures([]);
     }
   };
   useEffect(() => {
@@ -185,21 +207,39 @@ export default function ReactPdf() {
     //TODO replace 200 with dynamic value
     const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
 
-    const localPosition = {
+    const localPositionText = {
       x: e.clientX - reactBounding.left,
       y: yOnCanvas,
     };
-    const downloadPosition = {
+
+    const downloadPositionText = {
       x: e.clientX - reactBounding.left + 12,
       y: e.clientY - reactBounding.top - 9,
     };
 
+    const localPositionSign = {
+      x: e.clientX - reactBounding.left - 75,
+      y: yOnCanvas - 50,
+    };
+
+    const downloadPositionSign = {
+      x: e.clientX - reactBounding.left - 75,
+      y: e.currentTarget.clientHeight - e.clientY + 250,
+    };
+    console.log(
+      `e.clientY: ${e.clientY}, e.currentTarget.clientHeight: ${e.currentTarget.clientHeight}`
+    );
     if (elementType === ElementType.text) {
+      console.log(
+        "addNewComponent.downloadPositionText: ",
+        downloadPositionText
+      );
+
       const newDraggableText = {
         text: "",
         id: "t-" + textIdCounter,
-        localPosition: localPosition,
-        downloadPosition: downloadPosition,
+        localPosition: localPositionText,
+        downloadPosition: downloadPositionText,
       };
       setTextIdCounter((prevIdCounter) => prevIdCounter + 1);
       if (
@@ -216,14 +256,19 @@ export default function ReactPdf() {
       setElementType(ElementType.empty);
     }
     if (elementType === ElementType.sign) {
+      console.log(
+        "addNewComponent.downloadPositionSign: ",
+        downloadPositionSign
+      );
+
       if (!svg) {
         //TODO handle
       }
       const newDraggableSignature = {
         text: svg,
         id: "s-" + signIdCounter,
-        localPosition: localPosition,
-        downloadPosition: downloadPosition,
+        localPosition: localPositionSign,
+        downloadPosition: downloadPositionSign,
       };
       setSignIdCounter((prevIdCounter) => prevIdCounter + 1);
       setDraggableSignatures((prevSignatures) => [
@@ -241,32 +286,42 @@ export default function ReactPdf() {
     const { active, delta } = event;
     const id: string = active.id.toString();
     let draggable;
+
     if (id.charAt(0) === "t") {
       draggable = draggableTexts.find((d) => d.id == active.id);
-    }
-    if (id.charAt(0) === "s") {
-      draggable = draggableSignatures.find((d) => d.id == active.id);
-    }
-    if (!draggable) {
-      throw Error("handleDragEnd - no draggable found");
-    }
+      if (!draggable) {
+        throw Error("handleDragEnd - no draggable found");
+      }
+      const newLocalPosition = {
+        x: draggable.localPosition?.x + delta.x,
+        y: draggable.localPosition?.y + delta.y,
+      };
+      const newDownloadPosition = {
+        x: draggable.downloadPosition?.x + delta.x,
+        y: draggable.downloadPosition?.y + delta.y,
+      };
 
-    const newLocalPosition = {
-      x: draggable.localPosition?.x + delta.x,
-      y: draggable.localPosition?.y + delta.y,
-    };
-    const newDownloadPosition = {
-      x: draggable.downloadPosition?.x + delta.x,
-      y: draggable.downloadPosition?.y + delta.y,
-    };
-
-    draggable.localPosition = newLocalPosition;
-    draggable.downloadPosition = newDownloadPosition;
-    if (id.charAt(0) === "t") {
+      draggable.localPosition = newLocalPosition;
+      draggable.downloadPosition = newDownloadPosition;
       const otherDraggables = draggableTexts.filter((d) => d.id != active.id);
       setDraggableTexts([draggable, ...otherDraggables]);
     }
     if (id.charAt(0) === "s") {
+      draggable = draggableSignatures.find((d) => d.id == active.id);
+      if (!draggable) {
+        throw Error("handleDragEnd - no draggable found");
+      }
+      const newLocalPosition = {
+        x: draggable.localPosition?.x + delta.x,
+        y: draggable.localPosition?.y + delta.y,
+      };
+      const newDownloadPosition = {
+        x: draggable.downloadPosition?.x + delta.x,
+        y: draggable.downloadPosition?.y - delta.y,
+      };
+
+      draggable.localPosition = newLocalPosition;
+      draggable.downloadPosition = newDownloadPosition;
       const otherDraggables = draggableSignatures.filter(
         (d) => d.id != active.id
       );
@@ -284,6 +339,13 @@ export default function ReactPdf() {
         }
       });
     });
+  };
+
+  const removeSignature = (id: string) => {
+    console.log("ReactPdf.removeSignature.id: ", id);
+    setDraggableSignatures((prevSignatures) =>
+      prevSignatures.filter((signature) => signature.id !== id)
+    );
   };
   // generate blanc white pdf for testing
   async function getPDFLength(pdfUrl: string) {
@@ -309,7 +371,7 @@ export default function ReactPdf() {
     setSvg(sampleSVG);
   }, []);
   useEffect(() => {
-    console.log("Sing: ", draggableSignatures);
+    console.log("Text: ", draggableTexts);
   });
   return (
     <div className="PdfEditor">
@@ -387,6 +449,7 @@ export default function ReactPdf() {
                         }}
                         svg={svg}
                         position={signature.localPosition}
+                        removeSignature={removeSignature}
                       />
                     ))}
                   </Page>
