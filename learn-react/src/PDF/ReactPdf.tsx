@@ -17,7 +17,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import "./Sample.css";
+// import "./Sample.css";
 
 import DraggableText from "./DraggableText";
 import { SmartPointerSensor } from "./SmartPointerSensor";
