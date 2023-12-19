@@ -370,9 +370,7 @@ export default function ReactPdf() {
     //Set SVG
     setSvg(sampleSVG);
   }, []);
-  useEffect(() => {
-    console.log("Text: ", draggableTexts);
-  });
+
   return (
     <div className="PdfEditor">
       <header>

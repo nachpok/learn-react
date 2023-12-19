@@ -8,7 +8,7 @@ interface DrawSignProps {
 
 function DrawSign({ onSign }: DrawSignProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  let signaturePad: SignaturePad | null = null;
+  let signaturePadRef = useRef<SignaturePad | null>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -21,30 +21,30 @@ function DrawSign({ onSign }: DrawSignProps) {
       const context = canvas.getContext("2d");
       if (context !== null) {
         context.scale(ratio, ratio);
-        signaturePad = new SignaturePad(canvas, {
+        signaturePadRef.current = new SignaturePad(canvas, {
           minWidth: 0.5,
           maxWidth: 0.5,
         });
       }
     }
   }, []);
-  //TODO i cant resign, on second run signaturePad does not exist
+  //TODO i cant re-sign, on second run signaturePad does not exist
   const clear = () => {
-    if (!signaturePad) {
+    if (signaturePadRef.current) {
+      signaturePadRef.current.clear();
+    } else {
       throw Error("DrawSign.clear - No signaturePad");
     }
-    signaturePad?.clear();
   };
   const save = () => {
-    if (!signaturePad) {
+    if (signaturePadRef.current) {
+      const sign = signaturePadRef.current.toSVG();
+      onSign(sign);
+      signaturePadRef.current.clear();
+    } else {
       throw Error("DrawSign.save - No signaturePad");
     }
-    console.log("DrawSign.save.signaturePad: ", signaturePad);
-    const sign = signaturePad.toSVG();
-    onSign(sign);
-    console.log("DrawSign.save.sign: ", sign);
   };
-
   return (
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
