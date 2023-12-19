@@ -45,7 +45,7 @@ export enum ElementType {
 interface DraggableElement {
   text: string;
   id: string;
-
+  page: number;
   localPosition: {
     x: number;
     y: number;
@@ -62,7 +62,10 @@ export type Position = {
 };
 
 export interface Positions {
-  [key: string]: Position;
+  [key: string]: {
+    x: number;
+    y: number;
+  };
 }
 export default function ReactPdf() {
   const [file, setFile] = useState<File>();
@@ -105,9 +108,9 @@ export default function ReactPdf() {
     event: React.ChangeEvent<HTMLInputElement>
   ): Promise<void> {
     const { files } = event.target;
-
+    setDraggableTexts([]);
+    setDraggableSignatures([]);
     if (files && files[0]) {
-      console.log("files.len: ", files.length);
       setFile(files[0]);
       const buffer = await files[0].arrayBuffer();
       setPdfArrayBuffer(buffer);
@@ -123,22 +126,18 @@ export default function ReactPdf() {
     setNumPages(nextNumPages);
   }
 
-  //Todo - download new version of pdf, currently I download the original source pdf and then render and present the new edited one
   const downloadPDF = async () => {
     if (pdfArrayBuffer && containerWidth) {
       const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const pages = pdfDoc.getPages();
-      const page = pages[currentPage];
+      let page = pages[0];
       const fontSize = 13;
       const pageHeight = page.getHeight();
       const pageSizeRatio = clientHeight / pageHeight;
-      // console.log(
-      //   `downloadPDF - clientHeight: ${clientHeight},  pageHeight: ${pageHeight}`
-      // );
 
       draggableTexts.forEach((d) => {
-        console.log("ReactPdf.downloadPDF.d: ", d);
+        page = pages[d.page];
         page.drawText(d.text, {
           x: d.downloadPosition.x / pageSizeRatio - 2,
           y: pageHeight - d.downloadPosition.y / pageSizeRatio - 15,
@@ -148,6 +147,7 @@ export default function ReactPdf() {
         });
       });
       draggableSignatures.forEach((d) => {
+        page = pages[d.page];
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(d.text, "image/svg+xml");
         const pathElements = svgDoc.querySelectorAll("path");
@@ -176,9 +176,9 @@ export default function ReactPdf() {
       const dataUrl = URL.createObjectURL(blob);
       setPdfString(dataUrl);
       setShouldDownload(true);
-
-      setDraggableTexts([]);
-      setDraggableSignatures([]);
+      //Todo remove after fixing ratio issue
+      // setDraggableTexts([]);
+      // setDraggableSignatures([]);
     }
   };
   useEffect(() => {
@@ -226,17 +226,11 @@ export default function ReactPdf() {
       x: e.clientX - reactBounding.left - 75,
       y: e.currentTarget.clientHeight - e.clientY + 250,
     };
-    console.log(
-      `e.clientY: ${e.clientY}, e.currentTarget.clientHeight: ${e.currentTarget.clientHeight}`
-    );
-    if (elementType === ElementType.text) {
-      console.log(
-        "addNewComponent.downloadPositionText: ",
-        downloadPositionText
-      );
 
+    if (elementType === ElementType.text) {
       const newDraggableText = {
         text: "",
+        page: currentPage,
         id: "t-" + textIdCounter,
         localPosition: localPositionText,
         downloadPosition: downloadPositionText,
@@ -256,16 +250,12 @@ export default function ReactPdf() {
       setElementType(ElementType.empty);
     }
     if (elementType === ElementType.sign) {
-      console.log(
-        "addNewComponent.downloadPositionSign: ",
-        downloadPositionSign
-      );
-
       if (!svg) {
-        //TODO handle
+        return;
       }
       const newDraggableSignature = {
         text: svg,
+        page: currentPage,
         id: "s-" + signIdCounter,
         localPosition: localPositionSign,
         downloadPosition: downloadPositionSign,
@@ -281,8 +271,6 @@ export default function ReactPdf() {
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    console.log("handleDragEnd.e: ", event);
-
     const { active, delta } = event;
     const id: string = active.id.toString();
     let draggable;
@@ -342,7 +330,6 @@ export default function ReactPdf() {
   };
 
   const removeSignature = (id: string) => {
-    console.log("ReactPdf.removeSignature.id: ", id);
     setDraggableSignatures((prevSignatures) =>
       prevSignatures.filter((signature) => signature.id !== id)
     );
@@ -359,12 +346,12 @@ export default function ReactPdf() {
     const blob = base64ToBlob(fileBase64);
     const dataUrl = URL.createObjectURL(blob);
     setPdfString(dataUrl);
-    const len = getPDFLength(dataUrl).then((len) => {
+    getPDFLength(dataUrl).then((len) => {
       setNumPages(len);
     });
     const pdfFile = new File([blob], "sample", { type: "application/pdf" });
     setFile(pdfFile);
-    const buffer = pdfFile.arrayBuffer().then((buffer) => {
+    pdfFile.arrayBuffer().then((buffer) => {
       setPdfArrayBuffer(buffer);
     });
     //Set SVG
@@ -384,7 +371,13 @@ export default function ReactPdf() {
         </div>
         {file ? (
           <div className="PdfEditor__container__document" ref={setContainerRef}>
-            <div style={{ display: "flex" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <Button
                 type={elementType === ElementType.text ? "primary" : "default"}
                 onClick={() => {
@@ -422,41 +415,56 @@ export default function ReactPdf() {
                     }
                     onClick={addNewComponent}
                   >
-                    {draggableTexts.map((draggable) => (
-                      <DraggableText
-                        key={draggable.id}
-                        id={draggable.id.toString()}
-                        style={{
-                          zIndex: 5555,
-                          position: "absolute",
-                          transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
-                        }}
-                        position={draggable.localPosition}
-                        handleInputValue={handleInputValue}
-                        setDraggedElementType={setDraggedElementType}
-                      />
-                    ))}
-                    {draggableSignatures.map((signature) => (
-                      <DraggableSignature
-                        key={signature.id}
-                        id={signature.id.toString()}
-                        style={{
-                          zIndex: 5555,
-                          position: "absolute",
-                          transform: `translate(${signature.localPosition.x}px, ${signature.localPosition.y}px)`,
-                        }}
-                        svg={svg}
-                        position={signature.localPosition}
-                        removeSignature={removeSignature}
-                      />
-                    ))}
+                    {draggableTexts
+                      .filter((draggable) => draggable.page === currentPage)
+                      .map((draggable) => (
+                        <DraggableText
+                          key={draggable.id}
+                          id={draggable.id.toString()}
+                          style={{
+                            zIndex: 5555,
+                            position: "absolute",
+                            transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
+                          }}
+                          text={draggable.text}
+                          position={draggable.localPosition}
+                          handleInputValue={handleInputValue}
+                          setDraggedElementType={setDraggedElementType}
+                        />
+                      ))}
+                    {draggableSignatures
+                      .filter((draggable) => draggable.page === currentPage)
+                      .map((signature) => (
+                        <DraggableSignature
+                          key={signature.id}
+                          id={signature.id.toString()}
+                          style={{
+                            zIndex: 5555,
+                            position: "absolute",
+                            transform: `translate(${signature.localPosition.x}px, ${signature.localPosition.y}px)`,
+                          }}
+                          svg={svg}
+                          position={signature.localPosition}
+                          removeSignature={removeSignature}
+                        />
+                      ))}
                   </Page>
                 </div>
               </Document>
             </DndContext>
-            <Button onClick={prevPage}>Prevues</Button>
-            {currentPage + 1}/{numPages}
-            <Button onClick={nextPage}>Next</Button>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Button onClick={prevPage}>Prevues</Button>
+              <span style={{ margin: "0 10px" }}>
+                {currentPage + 1}/{numPages}
+              </span>
+              <Button onClick={nextPage}>Next</Button>
+            </div>
           </div>
         ) : (
           <></>

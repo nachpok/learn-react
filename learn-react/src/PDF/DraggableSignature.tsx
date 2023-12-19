@@ -41,7 +41,6 @@ function DraggableSignature({
     "<svg ",
     '<svg style="width:200px;height:100px;" '
   );
-
   return (
     <div
       className="svg-container"

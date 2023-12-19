@@ -7,6 +7,7 @@ interface DraggableTextProps {
   id: string;
   style?: React.CSSProperties;
   position: Position;
+  text: string;
   handleInputValue: (id: string, value: string) => void;
   setDraggedElementType: (newElementType: ElementType) => void;
 }
@@ -14,6 +15,7 @@ export default function DraggableText({
   id,
   style,
   position,
+  text,
   handleInputValue,
   setDraggedElementType,
 }: DraggableTextProps) {
@@ -59,7 +61,8 @@ export default function DraggableText({
             backgroundColor: "transparent",
           }}
           onInput={handleInputChange}
-        ></Input>
+          value={text}
+        />
       </span>
       {isInputFocused ? (
         <Button
