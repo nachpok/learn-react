@@ -127,7 +127,7 @@ export default function ReactPdf() {
       const fontSize = 16;
       const pageWidth = page.getWidth();
       const pageHeight = page.getHeight();
-      console.log(`pageHeight: ${pageHeight}, pageWidth: ${pageWidth}`);
+      console.log(` pageWidth: ${pageWidth}, pageHeight: ${pageHeight}`);
 
       draggableTexts.forEach((d) => {
         console.log("d: ", d);
@@ -199,10 +199,15 @@ export default function ReactPdf() {
 
   const addNewComponent = (e: React.MouseEvent) => {
     const reactBounding = e.currentTarget.getBoundingClientRect();
-    console.log(`addNewComponent.e.currentTarget: `, e.currentTarget);
+    // console.log(`addNewComponent.e.currentTarget: `, e.currentTarget);
 
     setClientHeight(e.currentTarget.clientHeight);
     //TODO replace 200 with dynamic value
+    const inputBoxLeftPadding = 12;
+    const inputBoxTopPadding = 9;
+    const topOfVPToTopOfCanvas = 186;
+    const yFromTopOfVP = e.clientY;
+    const canvasHight = e.currentTarget.clientHeight;
     const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
     const localPositionText = {
       x: e.clientX - reactBounding.left,
@@ -210,10 +215,14 @@ export default function ReactPdf() {
     };
 
     const downloadPositionText = {
-      x: e.clientX - reactBounding.left + 12,
-      y: e.currentTarget.clientHeight - e.clientY + 177,
+      x: e.clientX - reactBounding.left + inputBoxLeftPadding,
+      y: canvasHight - yFromTopOfVP + topOfVPToTopOfCanvas - inputBoxTopPadding,
     };
+    console.log(
+      `canvas height: ${e.currentTarget.clientHeight}, position in canvas: ${e.clientY}`
+    );
 
+    //Adust for signature size and location relative to drop point
     const localPositionSign = {
       x: e.clientX - reactBounding.left - 75,
       y: yOnCanvas - 50,
@@ -433,7 +442,7 @@ export default function ReactPdf() {
                           key={draggable.id}
                           id={draggable.id.toString()}
                           style={{
-                            zIndex: 5555,
+                            zIndex: 10,
                             position: "absolute",
                             transform: `translate(${draggable.localPosition.x}px, ${draggable.localPosition.y}px)`,
                           }}

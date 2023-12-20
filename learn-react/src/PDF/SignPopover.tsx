@@ -61,7 +61,7 @@ const SignPopover: React.FC<SignPopoverProps> = ({
   return (
     <div>
       <Modal
-        style={{ zIndex: 9999999999 }}
+        style={{ zIndex: 20 }}
         title="Basic Modal"
         open={isModalOpen}
         onOk={handleOk}
