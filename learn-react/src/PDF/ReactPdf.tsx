@@ -8,15 +8,7 @@ import { PDFDocument, StandardFonts, rgb, setLineHeight } from "pdf-lib";
 import { Button } from "antd";
 import "pdfjs-dist/build/pdf.worker.entry";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import {
-  DndContext,
-  DragEndEvent,
-  DragStartEvent,
-  // MouseSensor,
-  // useDraggable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { DndContext, DragEndEvent, useSensor, useSensors } from "@dnd-kit/core";
 import "./Sample.css";
 import { degrees } from "pdf-lib";
 import DraggableText from "./DraggableText";
@@ -95,11 +87,11 @@ export default function ReactPdf() {
   const onResize = useCallback<ResizeObserverCallback>((entries) => {
     const [entry] = entries;
 
-    if (entry) {
-      setContainerWidth(700);
-      //TODO set dynamic width by vw
-      // setContainerWidth(entry.contentRect.width);
-    }
+    // if (entry) {
+    //   setContainerWidth(700);
+    //   // TODO set dynamic width by vw
+    //   setContainerWidth(entry.contentRect.width);
+    // }
   }, []);
   const sensors = useSensors(useSensor(SmartPointerSensor));
   useResizeObserver(containerRef, resizeObserverOptions, onResize);
@@ -132,20 +124,23 @@ export default function ReactPdf() {
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const pages = pdfDoc.getPages();
       let page = pages[0];
-      const fontSize = 13;
+      const fontSize = 16;
+      const pageWidth = page.getWidth();
       const pageHeight = page.getHeight();
-      const pageSizeRatio = clientHeight / pageHeight;
+      console.log(`pageHeight: ${pageHeight}, pageWidth: ${pageWidth}`);
 
       draggableTexts.forEach((d) => {
+        console.log("d: ", d);
         page = pages[d.page];
         page.drawText(d.text, {
-          x: d.downloadPosition.x / pageSizeRatio - 2,
-          y: pageHeight - d.downloadPosition.y / pageSizeRatio - 15,
+          x: d.downloadPosition.x,
+          y: d.downloadPosition.y,
           size: fontSize,
           font: font,
           color: rgb(0, 0, 0),
         });
       });
+
       draggableSignatures.forEach((d) => {
         page = pages[d.page];
         const parser = new DOMParser();
@@ -157,9 +152,9 @@ export default function ReactPdf() {
 
           if (pathData) {
             page.drawSvgPath(pathData, {
-              x: d.downloadPosition.x / pageSizeRatio - 2,
-              y: d.downloadPosition.y / pageSizeRatio,
-              scale: 0.4,
+              x: d.downloadPosition.x,
+              y: d.downloadPosition.y,
+              scale: 0.45,
               rotate: degrees(0),
               color: rgb(1, 0, 0),
               borderColor: rgb(0, 0, 0),
@@ -204,9 +199,11 @@ export default function ReactPdf() {
 
   const addNewComponent = (e: React.MouseEvent) => {
     const reactBounding = e.currentTarget.getBoundingClientRect();
+    console.log(`addNewComponent.e.currentTarget: `, e.currentTarget);
+
+    setClientHeight(e.currentTarget.clientHeight);
     //TODO replace 200 with dynamic value
     const yOnCanvas = e.clientY - e.currentTarget.clientHeight - 200;
-
     const localPositionText = {
       x: e.clientX - reactBounding.left,
       y: yOnCanvas,
@@ -214,7 +211,7 @@ export default function ReactPdf() {
 
     const downloadPositionText = {
       x: e.clientX - reactBounding.left + 12,
-      y: e.clientY - reactBounding.top - 9,
+      y: e.currentTarget.clientHeight - e.clientY + 177,
     };
 
     const localPositionSign = {
@@ -246,7 +243,6 @@ export default function ReactPdf() {
         ...prevDraggables,
         newDraggableText,
       ]);
-      setClientHeight(e.currentTarget.clientHeight);
       setElementType(ElementType.empty);
     }
     if (elementType === ElementType.sign) {
@@ -265,7 +261,7 @@ export default function ReactPdf() {
         ...prevSignatures,
         newDraggableSignature,
       ]);
-      setClientHeight(e.currentTarget.clientHeight);
+
       setElementType(ElementType.empty);
     }
   };
@@ -281,12 +277,12 @@ export default function ReactPdf() {
         throw Error("handleDragEnd - no draggable found");
       }
       const newLocalPosition = {
-        x: draggable.localPosition?.x + delta.x,
-        y: draggable.localPosition?.y + delta.y,
+        x: draggable.localPosition.x + delta.x,
+        y: draggable.localPosition.y + delta.y,
       };
       const newDownloadPosition = {
-        x: draggable.downloadPosition?.x + delta.x,
-        y: draggable.downloadPosition?.y + delta.y,
+        x: draggable.downloadPosition.x + delta.x,
+        y: draggable.downloadPosition.y - delta.y,
       };
 
       draggable.localPosition = newLocalPosition;
@@ -300,12 +296,12 @@ export default function ReactPdf() {
         throw Error("handleDragEnd - no draggable found");
       }
       const newLocalPosition = {
-        x: draggable.localPosition?.x + delta.x,
-        y: draggable.localPosition?.y + delta.y,
+        x: draggable.localPosition.x + delta.x,
+        y: draggable.localPosition.y + delta.y,
       };
       const newDownloadPosition = {
-        x: draggable.downloadPosition?.x + delta.x,
-        y: draggable.downloadPosition?.y - delta.y,
+        x: draggable.downloadPosition.x + delta.x,
+        y: draggable.downloadPosition.y - delta.y,
       };
 
       draggable.localPosition = newLocalPosition;
@@ -343,6 +339,7 @@ export default function ReactPdf() {
   }
   useEffect(() => {
     //Set PDF
+
     const blob = base64ToBlob(fileBase64);
     const dataUrl = URL.createObjectURL(blob);
     setPdfString(dataUrl);
@@ -354,10 +351,23 @@ export default function ReactPdf() {
     pdfFile.arrayBuffer().then((buffer) => {
       setPdfArrayBuffer(buffer);
     });
+
     //Set SVG
     setSvg(sampleSVG);
   }, []);
+  useEffect(() => {
+    const loadPdf = async () => {
+      if (pdfArrayBuffer) {
+        const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
+        const pages = pdfDoc.getPages();
+        let page = pages[0];
+        const pageWidth = page.getWidth();
+        setContainerWidth(pageWidth);
+      }
+    };
 
+    loadPdf();
+  }, [pdfArrayBuffer]);
   return (
     <div className="PdfEditor">
       <header>
@@ -394,6 +404,7 @@ export default function ReactPdf() {
                 onNewSignature={setSvg}
                 elementType={elementType}
                 setElementType={setElementType}
+                style={{ zIndex: 9999, position: "relative" }}
               />
               <span style={{ width: "10px" }}></span>
               <Button onClick={downloadPDF}>Download PDF</Button>

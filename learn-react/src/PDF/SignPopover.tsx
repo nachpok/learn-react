@@ -7,12 +7,14 @@ interface SignPopoverProps {
   elementType: ElementType;
   setElementType: (newElementType: ElementType) => void;
   onNewSignature: (sign: string) => void;
+  style: React.CSSProperties;
 }
 const SignPopover: React.FC<SignPopoverProps> = ({
   svg,
   onNewSignature,
   elementType,
   setElementType,
+  style,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -32,7 +34,8 @@ const SignPopover: React.FC<SignPopoverProps> = ({
     setIsModalOpen(false);
   };
   const content = (
-    <div style={{ backgroundColor: "white" }}>
+    <div style={{ backgroundColor: "white", ...style }}>
+      {" "}
       <div dangerouslySetInnerHTML={{ __html: svg }} />
       <div
         style={{
@@ -58,7 +61,7 @@ const SignPopover: React.FC<SignPopoverProps> = ({
   return (
     <div>
       <Modal
-        style={{ zIndex: 2147483647 }}
+        style={{ zIndex: 9999999999 }}
         title="Basic Modal"
         open={isModalOpen}
         onOk={handleOk}
