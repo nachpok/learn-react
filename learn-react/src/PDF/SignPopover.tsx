@@ -68,7 +68,7 @@ const SignPopover: React.FC<SignPopoverProps> = ({
         onCancel={handleCancel}
         footer={[]}
       >
-        <DrawSign onSign={onCreateSignature} />
+        <DrawSign onSign={onCreateSignature} setElementType={setElementType} />
       </Modal>
       {svg ? (
         <Popover placement="bottom" content={content}>

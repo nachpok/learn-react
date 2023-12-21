@@ -72,7 +72,7 @@ export default function ReactPdf() {
   const [elementType, setElementType] = useState<ElementType>(
     ElementType.empty
   );
-  const [clientHeight, setClientHeight] = useState<number>(0);
+  const [fileName, setFileName] = useState<string>("");
   const [shouldDownload, setShouldDownload] = useState(false);
   const [draggableTexts, setDraggableTexts] = useState<DraggableElement[]>([]);
   const [draggableSignatures, setDraggableSignatures] = useState<
@@ -100,6 +100,8 @@ export default function ReactPdf() {
     event: React.ChangeEvent<HTMLInputElement>
   ): Promise<void> {
     const { files } = event.target;
+    console.log("onFileUpload.file: ", file);
+    setFileName(file?.name || "file");
     setDraggableTexts([]);
     setDraggableSignatures([]);
     if (files && files[0]) {
@@ -166,7 +168,7 @@ export default function ReactPdf() {
       const pdfBytes = await pdfDoc.save();
       setPdfArrayBuffer(pdfBytes);
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const pdfFile = new File([blob], "sample", { type: "application/pdf" });
+      const pdfFile = new File([blob], fileName, { type: "application/pdf" });
       setFile(pdfFile);
       const dataUrl = URL.createObjectURL(blob);
       setPdfString(dataUrl);
@@ -180,7 +182,7 @@ export default function ReactPdf() {
     if (pdfString && shouldDownload) {
       const a = document.createElement("a");
       a.href = pdfString;
-      a.download = "uploaded.pdf";
+      a.download = fileName;
       a.click();
       setShouldDownload(false);
     }
@@ -199,10 +201,6 @@ export default function ReactPdf() {
 
   const addNewComponent = (e: React.MouseEvent) => {
     const reactBounding = e.currentTarget.getBoundingClientRect();
-    // console.log(`addNewComponent.e.currentTarget: `, e.currentTarget);
-
-    setClientHeight(e.currentTarget.clientHeight);
-    //TODO replace 200 with dynamic value
     const inputBoxLeftPadding = 12;
     const inputBoxTopPadding = 9;
     const topOfVPToTopOfCanvas = 186;
@@ -218,9 +216,6 @@ export default function ReactPdf() {
       x: e.clientX - reactBounding.left + inputBoxLeftPadding,
       y: canvasHight - yFromTopOfVP + topOfVPToTopOfCanvas - inputBoxTopPadding,
     };
-    console.log(
-      `canvas height: ${e.currentTarget.clientHeight}, position in canvas: ${e.clientY}`
-    );
 
     //Adust for signature size and location relative to drop point
     const localPositionSign = {
@@ -360,9 +355,9 @@ export default function ReactPdf() {
     pdfFile.arrayBuffer().then((buffer) => {
       setPdfArrayBuffer(buffer);
     });
-
+    setFileName(pdfFile.name);
     //Set SVG
-    setSvg(sampleSVG);
+    // setSvg(sampleSVG);
   }, []);
   useEffect(() => {
     const loadPdf = async () => {
@@ -459,11 +454,11 @@ export default function ReactPdf() {
                           key={signature.id}
                           id={signature.id.toString()}
                           style={{
-                            zIndex: 5555,
+                            zIndex: 10,
                             position: "absolute",
                             transform: `translate(${signature.localPosition.x}px, ${signature.localPosition.y}px)`,
                           }}
-                          svg={svg}
+                          svg={signature.text}
                           position={signature.localPosition}
                           removeSignature={removeSignature}
                         />

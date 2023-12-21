@@ -9,7 +9,6 @@ import ResetPassword from "./ToDo/ResetPassword";
 import Firebase from "./ToDo/Firebase";
 import HomePage from "./HomePage";
 import ReactPdf from "./PDF/ReactPdf";
-import Test from "./PDF/Test";
 
 const App: React.FC = () => {
   const [firebase, setFirebase] = useState<Firebase | null>(null);

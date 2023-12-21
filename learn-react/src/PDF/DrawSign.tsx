@@ -1,12 +1,14 @@
 import React, { useRef, useEffect } from "react";
 import SignaturePad from "signature_pad";
 import { Button } from "antd";
+import { ElementType } from "./ReactPdf";
 
 interface DrawSignProps {
   onSign: (sign: string) => void;
+  setElementType: (newElementType: ElementType) => void;
 }
 
-function DrawSign({ onSign }: DrawSignProps) {
+function DrawSign({ onSign, setElementType }: DrawSignProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   let signaturePadRef = useRef<SignaturePad | null>(null);
 
@@ -41,6 +43,7 @@ function DrawSign({ onSign }: DrawSignProps) {
       const sign = signaturePadRef.current.toSVG();
       onSign(sign);
       signaturePadRef.current.clear();
+      setElementType(ElementType.sign);
     } else {
       throw Error("DrawSign.save - No signaturePad");
     }
